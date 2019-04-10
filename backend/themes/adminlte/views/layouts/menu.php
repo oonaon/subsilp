@@ -99,8 +99,9 @@
                             'icon' => 'desktop',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['setting/language'],],
+                                ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['language/index'],],
                                 ['label' => Yii::t('backend/menu', 'gii'), 'icon' => 'file-code-o', 'url' => ['/gii'],],
+                                ['label' => Yii::t('backend/menu', 'debug'), 'icon' => 'bug', 'url' => ['/debug'],],
                             ],
                         ],
                     ],
