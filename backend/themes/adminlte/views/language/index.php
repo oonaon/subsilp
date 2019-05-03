@@ -2,26 +2,23 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use common\models\MessageSource;
 
 /* @var $this yii\web\View */
+/* @var $searchModel common\models\MessageSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Source Messages');
+$this->title = Yii::t('backend/menu', 'language');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+
 <div class="source-message-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
 
-    <p>
-        <?= Html::a(Yii::t('app', 'Create Source Message'), ['create'], ['class' => 'btn btn-success']) ?>
-    </p>
 
     <div class="box">
-        <div class="box-header">
-            <h3 class="box-title">Data Table With Full Features</h3>
-        </div>
-        <!-- /.box-header -->
+        
         <div class="box-body">
             <div id="example1_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                 <?php /*
@@ -51,33 +48,34 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="row">
                     <div class="col-sm-12">
                         <?php
-                        $cols = [
-                            //  ['class' => 'yii\grid\SerialColumn'],
-                            'id',
-                            'category',
-                            'message:ntext',
-                        ];
-                        foreach (Yii::$app->params['supportLanguages'] as $lang) {
-                            echo $lang;
-                            $cols[] = [
-                                'attribute' => $lang,
-                                'label' => strtoupper($lang),
-                                'value' => function ($model) use ($lang) { return $model->getMessagesLanguage($lang); },
-                            ];
-                        }
-                        $cols[] = [
-                            'class' => 'yii\grid\ActionColumn',
-                            // 'buttonOptions' => ['class' => 'btn btn-default'],
-                            'template' => '<div class="btn-group btn-group-sm text-center" role="group"> {view} {update} {delete} </div>',
-                            'contentOptions' => [
-                                'noWrap' => true,
-                                'style' => 'width: 120px;'
-                            ],
-                        ];
-
                         echo GridView::widget([
                             'dataProvider' => $dataProvider,
-                            'columns' => $cols,
+                            'filterModel' => $searchModel,
+                            'columns' => [
+                                //  ['class' => 'yii\grid\SerialColumn'],
+                                //'id',
+                                [
+                                    'attribute' => 'category',
+                                    'filter' => ArrayHelper::map(MessageSource::find()->all(), 'category', 'category'),
+                                ],
+                                'message:ntext',
+                                [
+                                    'attribute' => 'lang_th',
+                                    'label' => Yii::t('common/general', 'thai'),
+                                    'value' => function ($model) {
+                                        return $model->getMessageTranslate('th');
+                                    },
+                                ], [
+                                    'attribute' => 'lang_en',
+                                    'label' => Yii::t('common/general', 'english'),
+                                    'value' => function ($model) {
+                                        return $model->getMessageTranslate('en');
+                                    },
+                                ],
+                                [
+                                    'class' => 'yii\grid\ActionColumn',
+                                ],
+                            ],
                         ]);
                         ?>
                     </div>

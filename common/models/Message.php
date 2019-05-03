@@ -34,7 +34,7 @@ class Message extends \yii\db\ActiveRecord
             [['translation'], 'string'],
             [['language'], 'string', 'max' => 16],
             [['id', 'language'], 'unique', 'targetAttribute' => ['id', 'language']],
-            [['id'], 'exist', 'skipOnError' => true, 'targetClass' => SourceMessage::className(), 'targetAttribute' => ['id' => 'id']],
+            [['id'], 'exist', 'skipOnError' => true, 'targetClass' => MessageSource::className(), 'targetAttribute' => ['id' => 'id']],
         ];
     }
 
@@ -55,6 +55,6 @@ class Message extends \yii\db\ActiveRecord
      */
     public function getId0()
     {
-        return $this->hasOne(SourceMessage::className(), ['id' => 'id']);
+        return $this->hasOne(MessageSource::className(), ['id' => 'id']);
     }
 }

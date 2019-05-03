@@ -1,16 +1,23 @@
 <?php
+
 $params = array_merge(
-    require __DIR__ . '/../../common/config/params.php',
-    require __DIR__ . '/../../common/config/params-local.php',
-    require __DIR__ . '/params.php',
-    require __DIR__ . '/params-local.php'
+        require __DIR__ . '/../../common/config/params.php', require __DIR__ . '/../../common/config/params-local.php', require __DIR__ . '/params.php', require __DIR__ . '/params-local.php'
 );
 
 return [
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log',
+        [
+            'class' => 'common\components\LanguageSelector',
+            'supportedLanguages' => ['en', 'th'],
+        ],
+        [
+            'class' => 'common\components\OrganizeSelector',
+            'supportedOrganize' => ['con', 'easy'],
+        ]
+    ],
     'modules' => [],
     'components' => [
         'request' => [
@@ -38,20 +45,54 @@ return [
             'errorAction' => 'site/error',
         ],
         /*
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
-            ],
-        ],
-        */
+          'urlManager' => [
+          'enablePrettyUrl' => true,
+          'showScriptName' => false,
+          'rules' => [
+          ],
+          ],
+         */
         'view' => [
             'theme' => [
                 'pathMap' => [
-                    '@app/views' => '@backend/themes/adminlte/views'
+                    '@app/views' => '@backend/themes/adminlte/views',
+                    '@app/widgets' => '@backend/themes/adminlte/views/widgets',
                 ]
             ]
         ]
     ],
+    'container' => [
+        'definitions' => [
+            yii\grid\GridView::class => [
+                'layout' => "{items}\n{summary} {pager}",
+                'summary' => "",
+            //'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+            ],
+            yii\grid\ActionColumn::class => [
+                'buttonOptions' => ['class' => 'btn btn-default btn-xs'],
+                'template' => '{view} {update} {delete}',
+                'buttons' => [
+                    'delete' => function($url, $model) {
+                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                                    'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'confirm' => Yii::t('backend/general', 'confirm_delete'),
+                                        'method' => 'post',
+                                    ],
+                        ]);
+                    }
+                ],
+                'contentOptions' => [
+                    'noWrap' => true,
+                    'style' => 'width: 100px;'
+                ],
+            ],
+            yii\data\Pagination::class => [
+                'defaultPageSize' => 20,
+            ],
+        ],
+    ],
     'params' => $params,
 ];
+
+                

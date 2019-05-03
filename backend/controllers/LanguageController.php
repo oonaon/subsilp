@@ -3,15 +3,15 @@
 namespace backend\controllers;
 
 use Yii;
-use common\models\SourceMessage;
 use common\models\Message;
-use yii\data\ActiveDataProvider;
+use common\models\MessageSource;
+use common\models\MessageSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * LanguageController implements the CRUD actions for SourceMessage model.
+ * LanguageController implements the CRUD actions for MessageSource model.
  */
 class LanguageController extends Controller
 {
@@ -31,32 +31,34 @@ class LanguageController extends Controller
     }
 
     /**
-     * Lists all SourceMessage models.
+     * Lists all MessageSource models.
      * @return mixed
      */
     public function actionIndex()
     {
-        $dataProvider = new ActiveDataProvider([
-            'query' => SourceMessage::find(),
-        ]);
+        $searchModel = new MessageSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
     }
 
     /**
-     * Creates a new SourceMessage model.
+     * Creates a new MessageSource model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate()
     {
-        $model = new SourceMessage();
+        $model = new MessageSource();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            Yii::$app->session->setFlash('success', Yii::t('backend/flash', 'create_success'));
+            return $this->redirect(['index']);
         }
+        
 
         return $this->render('create', [
             'model' => $model,
@@ -64,7 +66,7 @@ class LanguageController extends Controller
     }
 
     /**
-     * Updates an existing SourceMessage model.
+     * Updates an existing MessageSource model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -75,16 +77,17 @@ class LanguageController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            Yii::$app->session->setFlash('success', Yii::t('backend/flash', 'update_success'));
+            return $this->redirect(['index']);
         }
-
+        
         return $this->render('update', [
             'model' => $model,
         ]);
     }
 
     /**
-     * Deletes an existing SourceMessage model.
+     * Deletes an existing MessageSource model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -92,22 +95,23 @@ class LanguageController extends Controller
      */
     public function actionDelete($id)
     {
-        Message::deleteAll(['id'=>$id]);
         $this->findModel($id)->delete();
-
+        Message::deleteAll(['id' => $id]);     
+        Yii::$app->session->setFlash('success', Yii::t('backend/flash', 'delete_success'));
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the SourceMessage model based on its primary key value.
+     * Finds the MessageSource model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return SourceMessage the loaded model
+     * @return MessageSource the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = SourceMessage::findOne($id)) !== null) {
+        if (($model = MessageSource::findOne($id)) !== null) {
+            $model->getMessageLoad();
             return $model;
         }
 

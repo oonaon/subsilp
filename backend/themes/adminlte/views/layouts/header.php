@@ -1,5 +1,6 @@
 <?php
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 /* @var $this \yii\web\View */
 /* @var $content string */
@@ -270,6 +271,54 @@ use yii\helpers\Html;
                         </li>
                     </ul>
                 </li>
+                
+                
+                
+                <li class="dropdown notifications-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-database"></i>
+                        <span class="label label-default"><?=strtoupper(Yii::$app->session['organize'])?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <ul class="menu">
+                                <li>
+                                    <?=Html::a('<i class="fa fa-database text-default"></i> CONTAINY', Url::current(['organize' => 'con']), ['class' => (Yii::$app->session['organize']=='con' ? 'active' : '')]);?>
+                                </li>
+                                <li>
+                                    <?=Html::a('<i class="fa fa-database text-default"></i> EASY CONTAINER', Url::current(['organize' => 'easy']), ['class' => (Yii::$app->session['organize']=='easy' ? 'active' : '')]);?>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                        
+                    </ul>
+                </li>
+                
+                
+                
+                <li class="dropdown notifications-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-language"></i>
+                        <span class="label label-default"><?=strtoupper(Yii::$app->language)?></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <ul class="menu">
+                                <li>
+                                    <?=Html::a('<i class="fa fa-users text-default"></i> '.Yii::t('common/general', 'thai'), Url::current(['language' => 'th']), ['class' => (Yii::$app->language=='th' ? 'active' : '')]);?>
+                                </li>
+                                <li>
+                                    <?=Html::a('<i class="fa fa-users text-default"></i> '.Yii::t('common/general', 'english'), Url::current(['language' => 'en']), ['class' => (Yii::$app->language=='en' ? 'active' : '')]);?>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                        
+                    </ul>
+                </li>
+                
+            
 
                 <!-- User Account: style can be found in dropdown.less -->
                 <li>

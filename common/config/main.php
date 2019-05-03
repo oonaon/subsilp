@@ -14,8 +14,11 @@ return [
         'i18n' => [
             'translations' => [
                 '*' => [
-                    'class' => 'yii\i18n\DbMessageSource',
-                    'enableCaching'=>false,
+                    'class' => 'common\components\CDbMessageSource',
+                    'enableCaching' => false,
+                    'messageTable' => '{{%message}}',
+                    'sourceMessageTable' => '{{%message_source}}',
+                    'forceTranslation' => true
                 ],
             ],
         ],

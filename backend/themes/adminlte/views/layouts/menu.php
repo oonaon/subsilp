@@ -8,7 +8,7 @@
                 <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle" alt="User Image"/>
             </div>
             <div class="pull-left info">
-                <p><?= Yii::t('backend/menu', 'test') ?></p>
+                <p><?=strtoupper(Yii::$app->session['organize'])?></p>
 
                 <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
             </div>
@@ -40,7 +40,7 @@
                             'icon' => 'cart-arrow-down',
                             'url' => '#',
                             'items' => [
-                                ['label' => 'buy 1', 'icon' => 'file-code-o', 'url' => ['/gii'],],
+                                ['label' => Yii::t('backend/menu', 'supplier'), 'icon' => 'file-code-o', 'url' => ['company/index'],],
                                 ['label' => 'buy 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'buy 3',
@@ -59,7 +59,7 @@
                             'icon' => 'dollar',
                             'url' => '#',
                             'items' => [
-                                ['label' => 'sell 1', 'icon' => 'file-code-o', 'url' => ['/gii'],],
+                                ['label' => Yii::t('backend/menu', 'customer'), 'icon' => 'file-code-o', 'url' => ['company/index'],],
                                 ['label' => 'sell 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'sell 3',
@@ -102,6 +102,18 @@
                                 ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['language/index'],],
                                 ['label' => Yii::t('backend/menu', 'gii'), 'icon' => 'file-code-o', 'url' => ['/gii'],],
                                 ['label' => Yii::t('backend/menu', 'debug'), 'icon' => 'bug', 'url' => ['/debug'],],
+                            ],
+                        ],
+                        
+                        // ****** OTHER ******
+                        ['label' => Yii::t('backend/menu', 'other'), 'options' => ['class' => 'header']],
+                        // BUY MENU
+                        [
+                            'label' => Yii::t('backend/menu', 'link'),
+                            'icon' => 'desktop',
+                            'url' => '#',
+                            'items' => [
+                                ['label' => 'AdminLTE', 'icon' => 'language', 'url' => 'https://adminlte.io/themes/AdminLTE/pages/UI/icons.html',],
                             ],
                         ],
                     ],
