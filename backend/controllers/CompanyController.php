@@ -5,14 +5,17 @@ namespace backend\controllers;
 use Yii;
 use common\models\Company;
 use common\models\CompanySearch;
+use common\models\CompanyContact;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use common\components\ControlBar;
+use yii\data\ActiveDataProvider;
 
-/**
- * CompanyController implements the CRUD actions for Company model.
- */
 class CompanyController extends Controller {
+
+    public $company_type = 'cus';
+    public $tabs = ['item', 'contact', 'transport'];
 
     /**
      * {@inheritdoc}
@@ -28,103 +31,143 @@ class CompanyController extends Controller {
         ];
     }
 
-    /**
-     * Lists all Company models.
-     * @return mixed
-     */
     public function actionIndex() {
         $searchModel = new CompanySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $this->company_type);
 
-        return $this->render('page', [
+        return $this->render('/company/index', [
                     'searchModel' => $searchModel,
+                    'dataProvider' => $dataProvider,
+                    'company_type' => $this->company_type,
+        ]);
+    }
+
+    public function actionItem($id = '', $mode = '') {
+
+        Yii::$app->view->params['panel'] = 'control';
+        Yii::$app->view->params['tabs'] = $this->tabs;
+        Yii::$app->view->params['control'] = [
+            'classname' => $this->company_type,
+            'mode' => $mode,
+        ];
+
+        if ($mode == 'create') {
+            Yii::$app->view->params['disabled'] = false;
+            $model = new Company();
+
+            $model->org = Yii::$app->session['organize'];
+            $model->type = $this->company_type;
+            $model->status = 1;
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                return $this->redirect(['item', 'id' => $model->id]);
+            } else {
+                $model->code = ControlBar::getNextCode($this->company_type);
+            }
+        } else if ($mode == 'update') {
+            Yii::$app->view->params['disabled'] = false;
+            $model = $this->findModel($id);
+
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                return $this->redirect(['item', 'id' => $model->id]);
+            }
+        } else {
+            Yii::$app->view->params['disabled'] = true;
+            $model = $this->findModel($id);
+        }
+
+        return $this->render('/company/item', [
+                    'model' => $model,
+        ]);
+    }
+
+    public function actionAjax($sid) {
+
+
+        return $this->renderAjax('/company/ajax', [
+            'sid'=>$sid,
+        ]);
+    }
+
+    public function actionTransport($id, $mode = '') {
+        Yii::$app->view->params['panel'] = 'control';
+        Yii::$app->view->params['tabs'] = $this->tabs;
+        Yii::$app->view->params['control'] = [
+            'classname' => $this->company_type,
+            'mode' => $mode,
+        ];
+
+        Yii::$app->view->params['disabled'] = false;
+        $model = $this->findModel($id);
+
+        $query = CompanyContact::find()->where(['company_id' => $model->id]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false,
+        ]);
+
+        return $this->render('/company/transport', [
+                    'model' => $model,
                     'dataProvider' => $dataProvider,
         ]);
     }
 
-    public function actionFind() {
-        $code = Yii::$app->request->post('find_code');
-        $code = strtoupper($code);
-        if (substr($code, 0, 1) != 'C') {
-            $code = 'C' . $code;
-        }
-        $model = Company::findOne(['code' => $code]);
-        if ($model) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            Yii::$app->session->setFlash('warning', Yii::t('backend/flash', 'not_found'));
-            return $this->redirect(Yii::$app->request->referrer);
-        }
-    }
+    public function actionContact($id, $mode = '', $sid = '') {
+        Yii::$app->view->params['panel'] = 'control';
+        Yii::$app->view->params['tabs'] = $this->tabs;
+        Yii::$app->view->params['control'] = [
+            'classname' => $this->company_type,
+            'mode' => $mode,
+        ];
 
-    /**
-     * Displays a single Company model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionView($id) {
-        return $this->render('page', [
-                    'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new Company model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate() {
-        $model = new Company();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('page', [
-                    'model' => $model,
-        ]);
-    }
-
-    /**
-     * Updates an existing Company model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id) {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (!empty($sid)) {
+            $model_contact = CompanyContact::findOne($sid);
+        } else {
+            $model_contact = new CompanyContact();
+        }
+        if ($mode == 'update') {
+            Yii::$app->view->params['disabled'] = false;
+            $model_contact->company_id = $id;
+            if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
+                return $this->redirect(['contact', 'id' => $model->id]);
+            }
+        } else {
+            Yii::$app->view->params['disabled'] = true;
         }
 
-        return $this->render('page', [
+        $query = CompanyContact::find()->where(['company_id' => $model->id]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false,
+        ]);
+
+        return $this->render('/company/contact', [
                     'model' => $model,
+                    'model_contact' => $model_contact,
+                    'dataProvider' => $dataProvider,
         ]);
     }
 
-    /**
-     * Deletes an existing Company model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
     public function actionDelete($id) {
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Company model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Company the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
+    public function actionFind() {
+        $code = Yii::$app->request->post('find_code');
+        $code = strtoupper($code);
+        $model = Company::findOne(['code' => $code]);
+        if ($model) {
+            return $this->redirect(['item', 'id' => $model->id]);
+        } else {
+            Yii::$app->session->setFlash('warning', Yii::t('backend/flash', 'not_found'));
+            return $this->redirect(Yii::$app->request->referrer);
+        }
+    }
+
     protected function findModel($id) {
         if (($model = Company::findOne($id)) !== null) {
             return $model;

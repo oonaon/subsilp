@@ -8,7 +8,7 @@ use yii\helpers\Url;
 
 <header class="main-header">
 
-    <?= Html::a('<span class="logo-mini">APP</span><span class="logo-lg">' . Yii::$app->name . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
+    <?= Html::a('<span class="logo-mini">'.Yii::t('common/org', Yii::$app->session['organize'].'-shortname').'</span><span class="logo-lg">' . Yii::t('common/org', Yii::$app->session['organize'].'-title') . '</span>', Yii::$app->homeUrl, ['class' => 'logo']) ?>
 
     <nav class="navbar navbar-static-top" role="navigation">
 

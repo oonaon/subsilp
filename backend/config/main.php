@@ -54,6 +54,8 @@ return [
          */
         'view' => [
             'theme' => [
+                // 'basePath' => '@backend/themes/adminlte/views',
+                // 'baseUrl' => '@backend/themes/adminlte/views',
                 'pathMap' => [
                     '@app/views' => '@backend/themes/adminlte/views',
                     '@app/widgets' => '@backend/themes/adminlte/views/widgets',
@@ -70,18 +72,55 @@ return [
             ],
             yii\grid\ActionColumn::class => [
                 'buttonOptions' => ['class' => 'btn btn-default btn-xs'],
-                'template' => '{view} {update} {delete}',
+                //'template' => '{view} {delete}',
+                'template' => '{view} {delete}',
                 'buttons' => [
                     'delete' => function($url, $model) {
-                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->id], [
+                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
                                     'data' => [
                                         'confirm' => Yii::t('backend/general', 'confirm_delete'),
                                         'method' => 'post',
                                     ],
                         ]);
+                    },
+                    'update' => function($url, $model) {
+                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
+                                    'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'method' => 'post',
+                                    ],
+                        ]);
+                    },
+                    'view' => function($url, $model) {
+                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
+                                    'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'method' => 'post',
+                                    ],
+                        ]);
+                    },
+                    'modal' => function($url, $model) {
+                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
+                                    'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'method' => 'post',
+                                        'toggle' => 'modal',
+                                        'target' => '#modal-ajax',
+                                    ],
+                        ]);
                     }
                 ],
+                'urlCreator' => function ($button, $item, $key, $index) {
+                    if ($button === 'view') {
+                        $url = ['item', 'id' => $item->id];
+                        return $url;
+                    }
+                    if ($button === 'delete') {
+                        $url = ['delete', 'id' => $item->id];
+                        return $url;
+                    }
+                },
                 'contentOptions' => [
                     'noWrap' => true,
                     'style' => 'width: 100px;'
@@ -95,4 +134,3 @@ return [
     'params' => $params,
 ];
 
-                
