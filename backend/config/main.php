@@ -116,8 +116,12 @@ return [
                         $url = ['item', 'id' => $item->id];
                         return $url;
                     }
+                    if ($button === 'update') {
+                        $url = ['update', 'id' => $item->id];
+                        return $url;
+                    }
                     if ($button === 'delete') {
-                        $url = ['delete', 'id' => $item->id];
+                        $url = ['item_delete', 'id' => $item->id];
                         return $url;
                     }
                 },

@@ -9,7 +9,7 @@ use yii\helpers\Url;
 
 class ControlBar extends Widget {
 
-    public $classname, $pattern, $params, $id, $class, $mode;
+    public $classname, $pattern, $params, $id, $class;
 
     public function init() {
         parent::init();
@@ -24,12 +24,12 @@ class ControlBar extends Widget {
                 'modal' => false,
             ],
             'add' => [
-                'link' => ['item', 'mode' => 'create'],
+                'link' => ['item_create'],
                 'disabled' => false,
                 'modal' => false,
             ],
             'update' => [
-                'link' => Url::current(['mode' => 'update']),
+                'link' => ['item_update','id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
@@ -39,12 +39,12 @@ class ControlBar extends Widget {
                 'modal' => false,
             ],
             'cancel' => [
-                'link' => Url::current(['mode' => NULL]),
+                'link' => ['item','id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
             'delete' => [
-                'link' => ['delete', 'id' => $this->id],
+                'link' => ['item_delete', 'id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
@@ -95,7 +95,7 @@ class ControlBar extends Widget {
             $btn['next']['disabled'] = true;
             $btn['last']['disabled'] = true;
 
-            if ($this->mode == 'create') {
+            if ($action_id == 'item_create') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
@@ -138,7 +138,7 @@ class ControlBar extends Widget {
             $btn['update']['disabled'] = false;
             $btn['delete']['disabled'] = false;
 
-            if ($this->mode == 'update') {
+            if ($action_id == 'item_update') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
@@ -169,7 +169,7 @@ class ControlBar extends Widget {
     public function getNextCode($classname) {
         $org_prefix = strtoupper(substr(Yii::$app->session['organize'], 0, 1));
         $class = Yii::$app->params['class_model'][$classname];
-        $model = $class['class']::find()->where('(type like :type) and (org like :org)', [':type' => $classname, ':org' => Yii::$app->session['organize']])->orderBy([$class['primary'] => SORT_DESC])->one();
+        $model = $class['class']::find()->where('(type like :type) and (org like :org)', [':type' => '%'.$classname.'%', ':org' => '%'.Yii::$app->session['organize'].'%'])->orderBy(['abs(substring('.$class['primary'].', 3))' => SORT_DESC])->one();
         $num = (int) str_replace($org_prefix . $class['primary_prefix'], '', $model[$class['primary']]);
         $num += 1;
         return $org_prefix . $class['primary_prefix'] . $num;
@@ -182,7 +182,7 @@ class ControlBar extends Widget {
 
     private function getNextID() {
         $code = $this->getCurrentCode();
-        $model = $this->class['class']::find()->where('(type like :type) and (org like :org) and (' . $this->class['primary'] . '>:code)', [':type' => $this->classname, ':org' => Yii::$app->session['organize'], ':code' => $code])->orderBy([$this->class['primary'] => SORT_ASC])->one();
+        $model = $this->class['class']::find()->where('(type like :type) and (org like :org) and (' . $this->class['primary'] . '>:code)', [':type' => '%'.$this->classname.'%', ':org' => '%'.Yii::$app->session['organize'].'%', ':code' => $code])->orderBy([$this->class['primary'] => SORT_ASC])->one();
         if (empty($model)) {
             return $this->id;
         } else {
@@ -192,7 +192,7 @@ class ControlBar extends Widget {
 
     private function getPreviousID() {
         $code = $this->getCurrentCode();
-        $model = $this->class['class']::find()->where('(type like :type) and (org like :org) and (' . $this->class['primary'] . '<:code)', [':type' => $this->classname, ':org' => Yii::$app->session['organize'], ':code' => $code])->orderBy([$this->class['primary'] => SORT_DESC])->one();
+        $model = $this->class['class']::find()->where('(type like :type) and (org like :org) and (' . $this->class['primary'] . '<:code)', [':type' => '%'.$this->classname.'%', ':org' => '%'.Yii::$app->session['organize'].'%', ':code' => $code])->orderBy([$this->class['primary'] => SORT_DESC])->one();
         if (empty($model)) {
             return $this->id;
         } else {
@@ -202,7 +202,7 @@ class ControlBar extends Widget {
 
     private function getFirstID() {
 
-        $model = $this->class['class']::find()->where('(type like :type) and (org like :org)', [':type' => $this->classname, ':org' => Yii::$app->session['organize']])->orderBy([$this->class['primary'] => SORT_ASC])->one();
+        $model = $this->class['class']::find()->where('(type like :type) and (org like :org)', [':type' => '%'.$this->classname.'%', ':org' => '%'.Yii::$app->session['organize'].'%'])->orderBy([$this->class['primary'] => SORT_ASC])->one();
         if (empty($model)) {
             return $this->id;
         } else {
@@ -212,7 +212,7 @@ class ControlBar extends Widget {
 
     private function getLastID() {
 
-        $model = $this->class['class']::find()->where('(type like :type) and (org like :org)', [':type' => $this->classname, ':org' => Yii::$app->session['organize']])->orderBy([$this->class['primary'] => SORT_DESC])->one();
+        $model = $this->class['class']::find()->where('(type like :type) and (org like :org)', [':type' => '%'.$this->classname.'%', ':org' => '%'.Yii::$app->session['organize'].'%'])->orderBy([$this->class['primary'] => SORT_DESC])->one();
         if (empty($model)) {
             return $this->id;
         } else {

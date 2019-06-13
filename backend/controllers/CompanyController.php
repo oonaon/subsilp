@@ -34,7 +34,6 @@ class CompanyController extends Controller {
     public function actionIndex() {
         $searchModel = new CompanySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $this->company_type);
-
         return $this->render('/company/index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
@@ -42,118 +41,89 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionItem($id = '', $mode = '') {
-
-        Yii::$app->view->params['panel'] = 'control';
-        Yii::$app->view->params['tabs'] = $this->tabs;
-        Yii::$app->view->params['control'] = [
-            'classname' => $this->company_type,
-            'mode' => $mode,
-        ];
-
-        if ($mode == 'create') {
-            Yii::$app->view->params['disabled'] = false;
-            $model = new Company();
-
-            $model->org = Yii::$app->session['organize'];
-            $model->type = $this->company_type;
-            $model->status = 1;
-
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                return $this->redirect(['item', 'id' => $model->id]);
-            } else {
-                $model->code = ControlBar::getNextCode($this->company_type);
-            }
-        } else if ($mode == 'update') {
-            Yii::$app->view->params['disabled'] = false;
-            $model = $this->findModel($id);
-
-            if ($model->load(Yii::$app->request->post()) && $model->save()) {
-                return $this->redirect(['item', 'id' => $model->id]);
-            }
-        } else {
-            Yii::$app->view->params['disabled'] = true;
-            $model = $this->findModel($id);
-        }
-
+    public function actionItem($id = '') {
+        $model = $this->findModel($id);
         return $this->render('/company/item', [
                     'model' => $model,
+                    'company_type' => $this->company_type,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionAjax($sid) {
-
-
-        return $this->renderAjax('/company/ajax', [
-            'sid'=>$sid,
-        ]);
-    }
-
-    public function actionTransport($id, $mode = '') {
-        Yii::$app->view->params['panel'] = 'control';
-        Yii::$app->view->params['tabs'] = $this->tabs;
-        Yii::$app->view->params['control'] = [
-            'classname' => $this->company_type,
-            'mode' => $mode,
-        ];
-
-        Yii::$app->view->params['disabled'] = false;
-        $model = $this->findModel($id);
-
-        $query = CompanyContact::find()->where(['company_id' => $model->id]);
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'pagination' => false,
-        ]);
-
-        return $this->render('/company/transport', [
+    public function actionItem_create($id = '') {
+        $model = new Company();
+        $model->org = Yii::$app->session['organize'];
+        $model->type = $this->company_type;
+        $model->status = 1;
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['item', 'id' => $model->id]);
+        } else {
+            $model->code = ControlBar::getNextCode($this->company_type);
+        }
+        return $this->render('/company/item', [
                     'model' => $model,
-                    'dataProvider' => $dataProvider,
+                    'company_type' => $this->company_type,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionContact($id, $mode = '', $sid = '') {
-        Yii::$app->view->params['panel'] = 'control';
-        Yii::$app->view->params['tabs'] = $this->tabs;
-        Yii::$app->view->params['control'] = [
-            'classname' => $this->company_type,
-            'mode' => $mode,
-        ];
-
+    public function actionItem_update($id = '') {
         $model = $this->findModel($id);
-
-        if (!empty($sid)) {
-            $model_contact = CompanyContact::findOne($sid);
-        } else {
-            $model_contact = new CompanyContact();
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['item', 'id' => $model->id]);
         }
-        if ($mode == 'update') {
-            Yii::$app->view->params['disabled'] = false;
-            $model_contact->company_id = $id;
-            if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
-                return $this->redirect(['contact', 'id' => $model->id]);
-            }
-        } else {
-            Yii::$app->view->params['disabled'] = true;
-        }
+        return $this->render('/company/item', [
+                    'model' => $model,
+                    'company_type' => $this->company_type,
+                    'tabs' => $this->tabs,
+        ]);
+    }
 
+    public function actionItem_delete($id) {
+        $this->findModel($id)->delete();
+        return $this->redirect(['index']);
+    }
+
+    public function actionContact($id) {
+        $model = $this->findModel($id);
         $query = CompanyContact::find()->where(['company_id' => $model->id]);
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => false,
         ]);
-
         return $this->render('/company/contact', [
                     'model' => $model,
-                    'model_contact' => $model_contact,
                     'dataProvider' => $dataProvider,
+                    'company_type' => $this->company_type,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionDelete($id) {
-        $this->findModel($id)->delete();
+    public function actionContact_create($id) {
+        $model_contact = new CompanyContact();
+        $model_contact->company_id = $id;
+        if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
+            return $this->redirect(['contact', 'id' => $id]);
+        }
+        return $this->renderAjax('/company/contact_form', [
+                    'model_contact' => $model_contact,
+        ]);
+    }
 
-        return $this->redirect(['index']);
+    public function actionContact_update($id, $sid) {
+        $model_contact = CompanyContact::findOne($sid);
+        if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
+            return $this->redirect(['contact', 'id' => $id]);
+        }
+        return $this->renderAjax('/company/contact_form', [
+                    'model_contact' => $model_contact,
+        ]);
+    }
+
+    public function actionContact_delete($id, $sid) {
+        $model_contact = CompanyContact::findOne($sid)->delete();
+        ;
+        return $this->redirect(['contact', 'id' => $id]);
     }
 
     public function actionFind() {
@@ -172,7 +142,6 @@ class CompanyController extends Controller {
         if (($model = Company::findOne($id)) !== null) {
             return $model;
         }
-
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 

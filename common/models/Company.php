@@ -20,7 +20,7 @@ use Yii;
  * @property string $email
  * @property string $website
  * @property string $address
- * @property string $subdistrict
+ * @property string $amphure
  * @property string $district
  * @property string $province
  * @property string $postcode
@@ -49,13 +49,13 @@ class Company extends \yii\db\ActiveRecord {
         return [
             [['org', 'code', 'name', 'type'], 'required'],
             ['code', 'unique', 'targetAttribute' => ['code']],
-            [['branch', 'credit', 'salesman'], 'integer'],
-            [['branch', 'credit', 'salesman'], 'default', 'value' => 0],
+            [['branch', 'credit', 'salesman','amphure', 'district', 'province'], 'integer'],
+            [['branch', 'credit', 'salesman','amphure', 'district', 'province'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
             [['address', 'payment', 'memo', 'transport_note'], 'string'],
             [['postcode', 'transport', 'rank', 'status'], 'string', 'max' => 5],
             [['code', 'kind'], 'string', 'max' => 20],
-            [['name', 'tel', 'fax', 'email', 'website', 'subdistrict', 'district', 'province'], 'string', 'max' => 100],
+            [['name', 'tel', 'fax', 'email', 'website'], 'string', 'max' => 100],
             [['tax'], 'string', 'max' => 13],
             [['email'], 'email'],
         ];
@@ -79,7 +79,7 @@ class Company extends \yii\db\ActiveRecord {
             'email' => Yii::t('common/model', 'email'),
             'website' => Yii::t('common/model', 'website'),
             'address' => Yii::t('common/model', 'address'),
-            'subdistrict' => Yii::t('common/model', 'subdistrict'),
+            'amphure' => Yii::t('common/model', 'amphure'),
             'district' => Yii::t('common/model', 'district'),
             'province' => Yii::t('common/model', 'province'),
             'postcode' => Yii::t('common/model', 'postcode'),

@@ -19,11 +19,11 @@ class AjaxController extends Controller {
         $out = ['results' => ['id' => '', 'text' => '']];
 
         if (!is_null($input)) {
-            $where="category LIKE '%" . $input . "%'";
+            $where = "category LIKE '%" . $input . "%'";
         } else {
-            $where='';
+            $where = '';
         }
-        
+
         $model = MessageSource::find()
                 ->groupBy(['category'])
                 ->select(['category as text', 'id as id'])
@@ -36,7 +36,5 @@ class AjaxController extends Controller {
 
         return $out;
     }
-
-    
 
 }

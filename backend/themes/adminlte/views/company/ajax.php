@@ -1,1 +1,0 @@
-TEST CONTACT SID = <?=$sid?>

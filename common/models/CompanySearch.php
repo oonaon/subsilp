@@ -17,8 +17,8 @@ class CompanySearch extends Company {
      */
     public function rules() {
         return [
-            [['id', 'branch', 'credit', 'salesman', 'transport'], 'integer'],
-            [['org', 'code', 'type', 'kind', 'name', 'tax', 'tel', 'fax', 'email', 'website', 'address', 'subdistrict', 'district', 'province', 'postcode', 'payment', 'memo', 'rank', 'status'], 'safe'],
+            [['id', 'branch', 'credit', 'salesman', 'transport', 'amphure', 'district', 'province'], 'integer'],
+            [['org', 'code', 'type', 'kind', 'name', 'tax', 'tel', 'fax', 'email', 'website', 'address', 'postcode', 'payment', 'memo', 'rank', 'status'], 'safe'],
         ];
     }
 
@@ -37,7 +37,7 @@ class CompanySearch extends Company {
      *
      * @return ActiveDataProvider
      */
-    public function search($params,$type) {
+    public function search($params, $type) {
         $query = Company::find();
         $session = Yii::$app->session;
 
@@ -63,7 +63,7 @@ class CompanySearch extends Company {
             'salesman' => $this->salesman,
             'transport' => $this->transport,
         ]);
-        
+
         $query->andFilterWhere(['like', 'org', $session['organize']]);
 
         $query->andFilterWhere(['like', 'org', $this->org])
@@ -77,7 +77,7 @@ class CompanySearch extends Company {
                 ->andFilterWhere(['like', 'email', $this->email])
                 ->andFilterWhere(['like', 'website', $this->website])
                 ->andFilterWhere(['like', 'address', $this->address])
-                ->andFilterWhere(['like', 'subdistrict', $this->subdistrict])
+                ->andFilterWhere(['like', 'amphure', $this->amphure])
                 ->andFilterWhere(['like', 'district', $this->district])
                 ->andFilterWhere(['like', 'province', $this->province])
                 ->andFilterWhere(['like', 'postcode', $this->postcode])

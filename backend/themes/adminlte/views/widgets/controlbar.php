@@ -74,18 +74,15 @@ Modal::begin([
     'header' => Yii::t('backend/header', 'search_code'),
     'id' => 'modal-search',
     'size' => 'modal-md',
-    'footer' => '<button type="button" class="btn btn-default pull-left" data-dismiss="modal">' . Yii::t('backend/button', 'close') . '</button>' . Html::submitButton(Yii::t('backend/button', 'ok'), ['id' => 'btn-model-submit', 'class' => 'btn btn-primary']),
+    'footer' => '<button type="button" class="btn btn-default pull-left" data-dismiss="modal">' . Yii::t('backend/button', 'close') . '</button>' . Html::submitButton(Yii::t('backend/button', 'ok'), ['id' => 'btn-model-search', 'class' => 'btn btn-primary']),
 ]);
 $form = ActiveForm::begin([
-            'id' => 'form-model',
+            'id' => 'form-search-model',
             'action' => ['find'],
         ]);
 
 echo Html::textInput('find_code', '', ['class' => 'form-control']);
-$this->registerJs(' 
-        $("#btn-model-submit").click(function () {
-            $("#form-model").submit();
-        });', \yii\web\View::POS_READY);
+$this->registerJs('$("#btn-model-search").click(function(){$("#form-search-model").submit();});', \yii\web\View::POS_READY);
 ActiveForm::end();
 Modal::end();
 // ***** END MODEL SEARCH *****

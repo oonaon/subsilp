@@ -3,7 +3,7 @@
 use yii\widgets\Breadcrumbs;
 use dmstr\widgets\Alert;
 
-$panel = empty($this->params['panel']) ? 'default' : $this->params['panel'];
+$panel = empty($this->params['panel']['id']) ? 'default' : $this->params['panel']['id'];
 ?>
 <div class="content-wrapper">
     <section class="content-header">
