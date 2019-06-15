@@ -87,17 +87,11 @@ return [
                     'update' => function($url, $model) {
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
-                                    'data' => [
-                                        'method' => 'post',
-                                    ],
                         ]);
                     },
                     'view' => function($url, $model) {
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
-                                    'data' => [
-                                        'method' => 'post',
-                                    ],
                         ]);
                     },
                     'modal' => function($url, $model) {
@@ -111,20 +105,23 @@ return [
                         ]);
                     }
                 ],
-                'urlCreator' => function ($button, $item, $key, $index) {
-                    if ($button === 'view') {
-                        $url = ['item', 'id' => $item->id];
-                        return $url;
-                    }
-                    if ($button === 'update') {
-                        $url = ['update', 'id' => $item->id];
-                        return $url;
-                    }
-                    if ($button === 'delete') {
-                        $url = ['item_delete', 'id' => $item->id];
-                        return $url;
-                    }
-                },
+                /*
+                  'urlCreator' => function ($button, $item, $key, $index) {
+                  if ($button === 'view') {
+                  $url = ['view', 'id' => $item->id];
+                  return $url;
+                  }
+                  if ($button === 'update') {
+                  $url = ['update', 'id' => $item->id];
+                  return $url;
+                  }
+                  if ($button === 'delete') {
+                  $url = ['delete', 'id' => $item->id];
+                  return $url;
+                  }
+                  },
+
+                 */
                 'contentOptions' => [
                     'noWrap' => true,
                     'style' => 'width: 100px;'

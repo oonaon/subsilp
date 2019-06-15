@@ -32,7 +32,6 @@ class MessageSource extends \yii\db\ActiveRecord {
             [['lang_th', 'lang_en'], 'string'],
             [['message', 'category'], 'required'],
             [['message', 'category'], 'string', 'max' => 255],
-            [['message', 'category'], 'filter', 'filter'=>'strtolower'],
         ];
     }
 

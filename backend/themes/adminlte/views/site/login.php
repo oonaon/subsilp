@@ -21,7 +21,7 @@ $fieldOptions2 = [
 
 <div class="login-box">
     <div class="login-logo">
-        <a href="#"><b>Admin</b>LTE</a>
+        <a href="#"><?=Yii::t('common/general', 'sv_name')?></a>
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">

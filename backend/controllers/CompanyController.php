@@ -15,7 +15,7 @@ use yii\data\ActiveDataProvider;
 class CompanyController extends Controller {
 
     public $company_type = 'cus';
-    public $tabs = ['item', 'contact', 'transport'];
+    public $tabs = ['view', 'contact', 'transport'];
 
     /**
      * {@inheritdoc}
@@ -41,7 +41,8 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionItem($id = '') {
+    public function actionView($id = '') {
+        $this->layout='main_tab';
         $model = $this->findModel($id);
         return $this->render('/company/item', [
                     'model' => $model,
@@ -50,13 +51,14 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionItem_create($id = '') {
+    public function actionCreate($id = '') {
+        $this->layout='main_tab';
         $model = new Company();
         $model->org = Yii::$app->session['organize'];
         $model->type = $this->company_type;
         $model->status = 1;
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['item', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id]);
         } else {
             $model->code = ControlBar::getNextCode($this->company_type);
         }
@@ -67,10 +69,11 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionItem_update($id = '') {
+    public function actionUpdate($id = '') {
+        $this->layout='main_tab';
         $model = $this->findModel($id);
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['item', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id]);
         }
         return $this->render('/company/item', [
                     'model' => $model,
@@ -79,12 +82,13 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionItem_delete($id) {
+    public function actionDelete($id) {
         $this->findModel($id)->delete();
         return $this->redirect(['index']);
     }
 
     public function actionContact($id) {
+        $this->layout='main_tab';
         $model = $this->findModel($id);
         $query = CompanyContact::find()->where(['company_id' => $model->id]);
         $dataProvider = new ActiveDataProvider([
@@ -100,6 +104,7 @@ class CompanyController extends Controller {
     }
 
     public function actionContact_create($id) {
+        $this->layout='main_tab';
         $model_contact = new CompanyContact();
         $model_contact->company_id = $id;
         if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
@@ -111,6 +116,7 @@ class CompanyController extends Controller {
     }
 
     public function actionContact_update($id, $sid) {
+        $this->layout='main_tab';
         $model_contact = CompanyContact::findOne($sid);
         if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
             return $this->redirect(['contact', 'id' => $id]);
@@ -131,7 +137,7 @@ class CompanyController extends Controller {
         $code = strtoupper($code);
         $model = Company::findOne(['code' => $code]);
         if ($model) {
-            return $this->redirect(['item', 'id' => $model->id]);
+            return $this->redirect(['view', 'id' => $model->id]);
         } else {
             Yii::$app->session->setFlash('warning', Yii::t('backend/flash', 'not_found'));
             return $this->redirect(Yii::$app->request->referrer);

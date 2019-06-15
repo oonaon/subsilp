@@ -11,8 +11,8 @@ use backend\controllers\AreaController;
 $this->params['panel'] = [
     'id' => 'tab',
     'tabs' => $tabs,
-    'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['item_create', 'item_update']) ? true : false,
-    'disabled' => in_array(Yii::$app->controller->action->id, ['item_create', 'item_update']) ? false : true,
+    'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? true : false,
+    'disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? false : true,
     'tools' => false,
 ];
 $this->params['controlbar'] = [
@@ -34,7 +34,7 @@ if ($company_type == 'cus') {
     $this->title = Yii::t('backend/menu', 'injector');
 }
 if (!empty($model->id)) {
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
+    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
     $this->title = $model->name;
 }
 

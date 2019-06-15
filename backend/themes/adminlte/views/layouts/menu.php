@@ -1,3 +1,8 @@
+<?php
+$dir = $this->params['directory_asset'];
+$controller = Yii::$app->controller->id;
+$action = Yii::$app->controller->action->id;
+?>
 <aside class="main-sidebar">
 
     <section class="sidebar">
@@ -5,7 +10,7 @@
         <!-- Sidebar user panel -->
         <div class="user-panel">
             <div class="pull-left image">
-                <img src="<?= $directoryAsset ?>/img/user2-160x160.jpg" class="img-circle" alt="User Image"/>
+                <img src="<?= $dir ?>/img/user2-160x160.jpg" class="img-circle" alt="User Image"/>
             </div>
             <div class="pull-left info">
                 <p><?= strtoupper(Yii::$app->session['organize']) ?></p>
@@ -40,7 +45,7 @@
                             'icon' => 'cart-arrow-down',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'supplier'), 'icon' => 'file-code-o', 'url' => ['supplier/index'],'active' =>(Yii::$app->controller->id=='supplier'?true:false)],
+                                ['label' => Yii::t('backend/menu', 'supplier'), 'icon' => 'file-code-o', 'url' => ['/supplier/index'], 'active' => ($controller == 'supplier' ? true : false)],
                                 ['label' => 'buy 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'buy 3',
@@ -59,7 +64,7 @@
                             'icon' => 'dollar',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'customer'), 'icon' => 'file-code-o', 'url' => ['customer/index'],'active' =>(Yii::$app->controller->id=='customer'?true:false)],
+                                ['label' => Yii::t('backend/menu', 'customer'), 'icon' => 'file-code-o', 'url' => ['/customer/index'], 'active' => ($controller == 'customer' ? true : false)],
                                 ['label' => 'sell 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'sell 3',
@@ -78,7 +83,7 @@
                             'icon' => 'industry',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'injector'), 'icon' => 'file-code-o', 'url' => ['manufacturer/index'],'active' =>(Yii::$app->controller->id=='manufacturer'?true:false)],
+                                ['label' => Yii::t('backend/menu', 'injector'), 'icon' => 'file-code-o', 'url' => ['/manufacturer/index'], 'active' => ($controller == 'manufacturer' ? true : false)],
                                 ['label' => 'manu 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'manu 3',
@@ -118,9 +123,22 @@
                             'icon' => 'desktop',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['language/index'],],
+                                ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['/language/index'], 'active' => ($controller == 'language' ? true : false)],
                                 ['label' => Yii::t('backend/menu', 'gii'), 'icon' => 'file-code-o', 'url' => ['/gii'],],
                                 ['label' => Yii::t('backend/menu', 'debug'), 'icon' => 'bug', 'url' => ['/debug'],],
+                            ],
+                        ],
+                        // BUY MENU
+                        [
+                            'label' => Yii::t('backend/menu', 'rbac'),
+                            'icon' => 'key',
+                            'url' => '#',
+                            'items' => [
+                                ['label' => Yii::t('backend/menu', 'rbac_route'), 'icon' => 'circle', 'url' => ['/rbac/route'], 'active' => ($controller == 'route' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'rbac_permission'), 'icon' => 'circle', 'url' => ['/rbac/permission'], 'active' => ($controller == 'permission' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'rbac_role'), 'icon' => 'circle', 'url' => ['/rbac/role'], 'active' => ($controller == 'role' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'rbac_assignment'), 'icon' => 'circle', 'url' => ['/rbac/assignment'], 'active' => ($controller == 'assignment' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'rbac_rule'), 'icon' => 'circle', 'url' => ['/rbac/rule'], 'active' => ($controller == 'rule' ? true : false)],
                             ],
                         ],
                         // ****** OTHER ******

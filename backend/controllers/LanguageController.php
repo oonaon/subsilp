@@ -36,6 +36,7 @@ class LanguageController extends Controller
      */
     public function actionIndex()
     {
+        $this->layout='main_solid';
         $searchModel = new MessageSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -52,6 +53,7 @@ class LanguageController extends Controller
      */
     public function actionCreate()
     {
+        $this->layout='main_solid';
         $model = new MessageSource();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -74,6 +76,7 @@ class LanguageController extends Controller
      */
     public function actionUpdate($id)
     {
+        $this->layout='main_solid';
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {

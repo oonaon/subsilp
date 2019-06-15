@@ -24,12 +24,12 @@ class ControlBar extends Widget {
                 'modal' => false,
             ],
             'add' => [
-                'link' => ['item_create'],
+                'link' => ['create'],
                 'disabled' => false,
                 'modal' => false,
             ],
             'update' => [
-                'link' => ['item_update','id' => $this->id],
+                'link' => ['update','id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
@@ -39,12 +39,12 @@ class ControlBar extends Widget {
                 'modal' => false,
             ],
             'cancel' => [
-                'link' => ['item','id' => $this->id],
+                'link' => ['view','id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
             'delete' => [
-                'link' => ['item_delete', 'id' => $this->id],
+                'link' => ['delete', 'id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
             ],
@@ -95,7 +95,7 @@ class ControlBar extends Widget {
             $btn['next']['disabled'] = true;
             $btn['last']['disabled'] = true;
 
-            if ($action_id == 'item_create') {
+            if ($action_id == 'create') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
@@ -109,10 +109,10 @@ class ControlBar extends Widget {
             $id_last = $this->getLastID();
             $id_previous = $this->getPreviousID();
             $id_next = $this->getNextID();
-            $btn['first']['link'] = ['item', 'id' => $id_first];
-            $btn['last']['link'] = ['item', 'id' => $id_last];
-            $btn['previous']['link'] = ['item', 'id' => $id_previous];
-            $btn['next']['link'] = ['item', 'id' => $id_next];
+            $btn['first']['link'] = ['view', 'id' => $id_first];
+            $btn['last']['link'] = ['view', 'id' => $id_last];
+            $btn['previous']['link'] = ['view', 'id' => $id_previous];
+            $btn['next']['link'] = ['view', 'id' => $id_next];
 
             if ($id_first == $this->id) {
                 $btn['first']['disabled'] = true;
@@ -138,7 +138,7 @@ class ControlBar extends Widget {
             $btn['update']['disabled'] = false;
             $btn['delete']['disabled'] = false;
 
-            if ($action_id == 'item_update') {
+            if ($action_id == 'update') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
