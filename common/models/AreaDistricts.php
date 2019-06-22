@@ -54,4 +54,5 @@ class AreaDistricts extends \yii\db\ActiveRecord
     public function getAmphure(){
         return $this->hasOne(AreaAmphures::className(), ['id' => 'amphure_id']);
     }
+    
 }

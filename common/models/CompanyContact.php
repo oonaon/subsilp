@@ -11,7 +11,7 @@ use Yii;
  * @property int $company_id
  * @property string $name
  * @property string $contact
- * @property string $memo
+ * @property string $item_default
  */
 class CompanyContact extends \yii\db\ActiveRecord
 {
@@ -30,8 +30,8 @@ class CompanyContact extends \yii\db\ActiveRecord
     {
         return [
             [['company_id', 'name'], 'required'],
-            [['company_id'], 'integer'],
-            [['contact', 'memo'], 'string'],
+            [['company_id','item_default'], 'integer'],
+            [['contact'], 'string'],
             [['name'], 'string', 'max' => 100],
         ];
     }
@@ -46,7 +46,7 @@ class CompanyContact extends \yii\db\ActiveRecord
             'company_id' => Yii::t('common/model', 'company'),
             'name' => Yii::t('common/model', 'name'),
             'contact' => Yii::t('common/model', 'contact'),
-            'memo' => Yii::t('common/model', 'memo'),
+            'item_default' => Yii::t('common/model', 'item_default'),
         ];
     }
 }

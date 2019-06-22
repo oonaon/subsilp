@@ -47,6 +47,10 @@ class MessageSearch extends MessageSource {
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['id'=>SORT_DESC]],
+            'pagination' => [
+                'pageSize' => 30,
+            ],
         ]);
 
         $this->load($params);
@@ -61,7 +65,7 @@ class MessageSearch extends MessageSource {
         $query->andFilterWhere([
             'message_source.id' => $this->id,
         ]);
-        
+
         $query->andFilterWhere(['like', 'category', $this->category])
                 ->andFilterWhere(['like', 'message', $this->message]);
 

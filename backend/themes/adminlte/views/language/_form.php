@@ -51,9 +51,9 @@ use kartik\select2\Select2;
 
     <?= $form->field($model, 'message')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'lang_th')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'lang_th')->textInput() ?>
 
-    <?= $form->field($model, 'lang_en')->textarea(['rows' => 6]) ?>
+    <?= $form->field($model, 'lang_en')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>

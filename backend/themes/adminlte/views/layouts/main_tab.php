@@ -57,6 +57,6 @@ $panel = $this->params['panel'];
     </div>
 
 </div>
-<?= ModalAjax::widget(['id' => 'modal-ajax', 'size' => 'modal-lg']) ?>
+<?= ModalAjax::widget(['id' => 'modal-ajax']) ?>
 <?= $this->render('end') ?>
 <?php $this->endPage() ?>

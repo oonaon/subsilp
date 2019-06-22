@@ -1,12 +1,10 @@
 <?php
 
-use yii\widgets\ActiveForm;
 use yii\helpers\Url;
 use common\models\ItemAlias;
-use common\models\AreaCode;
 use kartik\select2\Select2;
-use kartik\widgets\DepDrop;
-use backend\controllers\AreaController;
+use common\components\Area;
+use yii\widgets\ActiveForm;
 
 $this->params['panel'] = [
     'id' => 'tab',
@@ -61,6 +59,7 @@ $form = ActiveForm::begin([
     ]);
     ?>
 </div>
+
 <div class="row">
     <?= $form->field($model, 'kind', ['options' => ['class' => 'col-xs-6 col-md-3']])->dropDownList(ItemAlias::getData('company_kind')) ?>
     <?= $form->field($model, 'name', ['options' => ['class' => 'col-xs-12 col-md-9']])->textInput(['maxlength' => true]) ?>
@@ -72,42 +71,9 @@ $form = ActiveForm::begin([
 </div>
 
 <div class="row">
-    <?= $form->field($model, 'address', ['options' => ['class' => 'col-xs-12']])->textInput() ?>
-    <?= $form->field($model, 'postcode', ['options' => ['class' => 'col-xs-6 col-md-3']])->textInput(['maxlength' => true, 'id' => 'ddl-postcode']) ?>
-    <?=
-    $form->field($model, 'province', ['options' => ['class' => 'col-xs-6 col-md-3']])->widget(DepDrop::classname(), [
-        'options' => ['id' => 'ddl-province'],
-        'data' => AreaController::getProvinces($model->postcode),
-        'pluginOptions' => [
-            'depends' => ['ddl-postcode'],
-            'placeholder' => Yii::t('backend/general', 'select'),
-            'url' => Url::to(['/area/postcode', 'area' => 'province'])
-        ]
-    ])
-    ?>
-
-    <?=
-    $form->field($model, 'amphure', ['options' => ['class' => 'col-xs-6 col-md-3']])->widget(DepDrop::classname(), [
-        'options' => ['id' => 'ddl-amphure'],
-        'data' => AreaController::getAmphures($model->postcode, $model->province),
-        'pluginOptions' => [
-            'depends' => ['ddl-postcode', 'ddl-province'],
-            'placeholder' => Yii::t('backend/general', 'select'),
-            'url' => Url::to(['/area/postcode', 'area' => 'amphure'])
-        ]
-    ])
-    ?>
-
-    <?=
-    $form->field($model, 'district', ['options' => ['class' => 'col-xs-6 col-md-3']])->widget(DepDrop::classname(), [
-        'data' => AreaController::getDistricts($model->postcode, $model->amphure),
-        'pluginOptions' => [
-            'depends' => ['ddl-postcode', 'ddl-amphure'],
-            'placeholder' => Yii::t('backend/general', 'select'),
-            'url' => Url::to(['/area/postcode', 'area' => 'district'])
-        ]
-    ])
-    ?>
+    <?= $form->field($model, 'postcode', ['options' => ['class' => 'col-xs-6 col-md-4']])->textInput(['maxlength' => true, 'id' => 'ddl-postcode']) ?>
+    <?= $form->field($model, 'district', ['options' => ['class' => 'col-xs-6 col-md-8']])->dropDownDependent('ddl-postcode',Area::getDistricts($model->postcode) , ['id' => 'ddl-district', 'prompt' => Yii::t('backend/general', 'select')]) ?>
+    <?= $form->field($model, 'address', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2]) ?>
 </div>
 
 <div class="row">

@@ -3,6 +3,7 @@
 namespace common\components;
 
 use common\models\ItemAlias;
+use common\components\Area;
 
 class CustomColumn {
 
@@ -21,7 +22,7 @@ class CustomColumn {
         //$alias = itemAlias::getData('org');
         $out = '';
         foreach ($val as $item) {
-            $letter= strtoupper(substr($item,0,1));
+            $letter = strtoupper(substr($item, 0, 1));
             if ($item == 'easy') {
                 $out .= '<small class="label label-success">' . $letter . '</small> ';
             } else if ($item == 'con') {
@@ -30,6 +31,41 @@ class CustomColumn {
         }
 
         return $out;
+    }
+
+    public function item_label($model, $labels = []) {
+
+        $out = '';
+
+        if (!empty($labels)) {
+            foreach ($labels as $label) {
+
+                if ($label == 'default') {
+                    $alias = itemAlias::getData('item_default');
+                    $val=$model->item_default;
+                    if ($val == 1) {
+                        $out .= '<small class="label label-default">' . $alias[$val] . '</small> ';
+                    } else {
+                        $out .= '';
+                    }
+                } else if ($label == 'fix') {
+                    $alias = itemAlias::getData('item_fix');
+                    $val=$model->item_fix;
+                    if ($val == 1) {
+                        $out .= '<small class="label label-default">' . $alias[$val] . '</small> ';
+                    } else {
+                        $out .= '';
+                    }
+                }
+            }
+        }
+
+
+        return $out;
+    }
+
+    public function full_address($model) {
+        return Area::fullAddress($model);
     }
 
 }

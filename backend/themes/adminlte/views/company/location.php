@@ -9,7 +9,7 @@ $this->params['panel'] = [
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
-    'tools' => Html::a(Yii::t('backend/button', 'add'), ['contact_create', 'id' => $model->id, '#' => 'modal-md'], ['class' => 'text-muted', 'data-toggle' => 'modal', 'data-target' => '#modal-ajax']),
+    'tools' => Html::a(Yii::t('backend/button', 'add'), ['location_create', 'id' => $model->id, '#' => 'modal-md'], ['class' => 'text-muted', 'data-toggle' => 'modal', 'data-target' => '#modal-ajax']),
 ];
 $this->params['controlbar'] = [
     'classname' => $company_type,
@@ -42,26 +42,35 @@ echo GridView::widget([
             'attribute' => 'item_default',
             'format' => 'html',
             'value' => function($model) {
-                return CustomColumn::item_label($model,['default']);                
+                return CustomColumn::item_label($model,['fix','default']);
             }
         ],
-        'name',
-        'contact',
+        [
+            'attribute' => 'address',
+            'format' => 'html',
+            'value' => function($model) {
+                return CustomColumn::full_address($model);
+            }
+        ],
         [
             'class' => 'yii\grid\ActionColumn',
             'template' => '{default} {modal} {delete}',
             'urlCreator' => function ($button, $item, $key, $index) use ($model) {
                 if ($button === 'default') {
-                    $url = ['contact_default', 'id' => $model->id, 'sid' => $item->id];
+                    $url = ['location_default', 'id' => $model->id, 'sid' => $item->id];
                     return $url;
                 }
                 if ($button === 'modal') {
-                    $url = ['contact_update', 'id' => $model->id, 'sid' => $item->id, '#' => 'modal-md'];
+                    $url = ['location_update', 'id' => $model->id, 'sid' => $item->id, '#' => 'modal-md'];
                     return $url;
                 }
                 if ($button === 'delete') {
-                    $url = ['contact_delete', 'id' => $model->id, 'sid' => $item->id];
-                    return $url;
+                    if ($item->item_fix) {
+                        return false;
+                    } else {
+                        $url = ['location_delete', 'id' => $model->id, 'sid' => $item->id];
+                        return $url;
+                    }
                 }
             },
         ],

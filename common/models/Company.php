@@ -3,6 +3,9 @@
 namespace common\models;
 
 use Yii;
+use common\models\AreaDistricts;
+use common\models\CompanyLocation;
+use common\models\Area;
 
 /**
  * This is the model class for table "company".
@@ -48,12 +51,14 @@ class Company extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['org', 'code', 'name', 'type'], 'required'],
+            //[['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             ['code', 'unique', 'targetAttribute' => ['code']],
-            [['branch', 'credit', 'salesman','amphure', 'district', 'province'], 'integer'],
-            [['branch', 'credit', 'salesman','amphure', 'district', 'province'], 'default', 'value' => 0],
+            [['branch', 'credit', 'salesman', 'district'], 'integer'],
+            [['branch', 'credit', 'salesman'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
             [['address', 'payment', 'memo', 'transport_note'], 'string'],
             [['postcode', 'transport', 'rank', 'status'], 'string', 'max' => 5],
+            [['postcode'], 'number'],
             [['code', 'kind'], 'string', 'max' => 20],
             [['name', 'tel', 'fax', 'email', 'website'], 'string', 'max' => 100],
             [['tax'], 'string', 'max' => 13],
@@ -94,10 +99,41 @@ class Company extends \yii\db\ActiveRecord {
         ];
     }
 
+    public function fullAddress() {
+        return Area::fullAddress($this);  
+    }
+
+    public function updateLocation() {
+        $model_location = CompanyLocation::findOne(['company_id' => $this->id, 'item_fix' => 1]);
+        if (empty($model_location)) {
+            $model_location = new CompanyLocation();
+            $model_location->company_id = $this->id;
+            $model_location->contact_id = 0;
+            $model_location->item_default = 1;
+            $model_location->item_fix = 1;
+        }
+        $model_location->address = $this->address;
+        $model_location->district = $this->district;
+        $model_location->amphure = $this->amphure;
+        $model_location->province = $this->province;
+        $model_location->postcode = $this->postcode;
+        return $model_location->save();
+    }
+
     public function beforeSave($insert) {
 
         $this->org = implode(',', $this->org);
         $this->type = implode(',', $this->type);
+
+        $district = AreaDistricts::findOne($this->district);
+        if (empty($district)) {
+            $this->district = 0;
+            $this->amphure = 0;
+            $this->province = 0;
+        } else {
+            $this->amphure = $district->amphure_id;
+            $this->province = $district->amphure->province_id;
+        }
 
         return parent::beforeSave($insert);
     }
@@ -109,9 +145,8 @@ class Company extends \yii\db\ActiveRecord {
 
         return parent::afterFind();
     }
-    
-    public function getContacts()
-    {
+
+    public function getContacts() {
         return $this->hasMany(CompanyContact::className(), ['company_id' => 'id']);
     }
 

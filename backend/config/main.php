@@ -65,6 +65,9 @@ return [
     ],
     'container' => [
         'definitions' => [
+            yii\widgets\ActiveForm::class => [
+                'fieldClass' => 'common\components\CActiveField',
+            ],
             yii\grid\GridView::class => [
                 'layout' => "{items}\n{summary} {pager}",
                 'summary' => "",
@@ -76,13 +79,20 @@ return [
                 'template' => '{view} {delete}',
                 'buttons' => [
                     'delete' => function($url, $model) {
-                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
-                                    'class' => 'btn btn-default btn-xs',
-                                    'data' => [
-                                        'confirm' => Yii::t('backend/general', 'confirm_delete'),
-                                        'method' => 'post',
-                                    ],
-                        ]);
+                        if (empty($url)) {
+                            return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
+                                        'class' => 'btn btn-default btn-xs',
+                                        'disabled' => true,
+                            ]);
+                        } else {
+                            return yii\helpers\Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
+                                        'class' => 'btn btn-default btn-xs',
+                                        'data' => [
+                                            'confirm' => Yii::t('backend/general', 'confirm_delete'),
+                                            'method' => 'post',
+                                        ],
+                            ]);
+                        }
                     },
                     'update' => function($url, $model) {
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
@@ -95,15 +105,36 @@ return [
                         ]);
                     },
                     'modal' => function($url, $model) {
-                        return yii\helpers\Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
+                        if (empty($url)) {
+                            return yii\helpers\Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
+                                        'class' => 'btn btn-default btn-xs',
+                                        'disabled' => true,
+                            ]);
+                        } else {
+                            return yii\helpers\Html::a('<span class="glyphicon glyphicon-edit"></span>', $url, [
+                                        'class' => 'btn btn-default btn-xs',
+                                        'data' => [
+                                            'method' => 'post',
+                                            'toggle' => 'modal',
+                                            'target' => '#modal-ajax',
+                                        ],
+                            ]);
+                        }
+                    },
+                    'default' => function($url, $model) {
+                        if ($model->item_default) {
+                            $icon = '<span class="fa fa-fw fa-circle"></span>';
+                        } else {
+                            $icon = '<span class="fa fa-fw fa-circle-o"></span>';
+                        }
+                        return yii\helpers\Html::a($icon, $url, [
                                     'class' => 'btn btn-default btn-xs',
                                     'data' => [
+                                        'confirm' => Yii::t('backend/general', 'confirm_defalt'),
                                         'method' => 'post',
-                                        'toggle' => 'modal',
-                                        'target' => '#modal-ajax',
                                     ],
                         ]);
-                    }
+                    },
                 ],
                 /*
                   'urlCreator' => function ($button, $item, $key, $index) {
@@ -128,7 +159,7 @@ return [
                 ],
             ],
             yii\data\Pagination::class => [
-                'defaultPageSize' => 20,
+                'defaultPageSize' => 15,
             ],
         ],
     ],
