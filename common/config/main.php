@@ -17,6 +17,13 @@ return [
         ],
     ],
     'components' => [
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => true,
+            'enableStrictParsing' => false,
+            'rules' => [
+            ],
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

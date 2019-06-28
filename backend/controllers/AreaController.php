@@ -16,12 +16,12 @@ class AreaController extends Controller {
         ];
     }
 
-    public function actionPostcode($postcode) {
+    public function actionPostcode($val) {
         $data = [];
         $selected = '';
         //$data[] = ['id' => 0, 'name' => Yii::t('backend/general', 'select')];
-        if (!empty($postcode)) {
-            $items = Area::getDistricts($postcode);
+        if (!empty($val)) {
+            $items = Area::getDistricts($val);
             if (!empty($items)) {
                 foreach ($items as $key => $item) {
                     $data[] = ['id' => $key, 'name' => $item];

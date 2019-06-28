@@ -20,7 +20,9 @@ class ModalAjax extends Widget {
         ]);
         Modal::end();
         
-        $this->getView()->registerJs('$("#btn-modal-submit").click(function(){$("#form-modal").submit();});', \yii\web\View::POS_READY);
+        $this->getView()->registerJs('$("#btn-modal-submit").click(function(){ 
+                    $("#form-modal").submit();
+                });', \yii\web\View::POS_READY);
         
         $this->getView()->registerJs('
             $("a[data-target=\'#' . $this->id . '\']").click(function(e) {
@@ -32,6 +34,7 @@ class ModalAjax extends Widget {
                     class_size = "' . $this->size . '";
                 }
                 $("#' . $this->id . '").find(".modal-dialog").attr("class", "modal-dialog "+class_size);
+                $("#' . $this->id . '").find(".modal-body").html("<div class=\"overlay\"><i class=\"fa fa-refresh fa-spin\"></i></div>");
                 $("#' . $this->id . '").find(".modal-body").load(url);
                 $("#' . $this->id . '").modal("show");
                 return false;

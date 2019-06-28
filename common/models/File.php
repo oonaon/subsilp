@@ -64,36 +64,13 @@ class File extends \yii\db\ActiveRecord {
         ];
     }
 
-    public static function initPreview($files, $type = '', $link = []) {
-        $initial = [];
-
-
-        if (is_array($files) && !empty($files)) {
-            foreach ($files as $key => $file) {
-                $f = self::findFile($file);
-                $caption=empty($f->caption)?$f->filename:$f->caption;
-                if ($type == 'config') {
-                    $link['file'] = $f->id;
-                    $initial[] = [
-                        'caption' => $caption,
-                        'width' => '120px',
-                        'size' => $f->size,
-                        'url' => Url::to($link),
-                        'key' => $key
-                    ];
-                } else {
-                    $initial[] = Html::img($f->url, ['class' => 'kv-preview-data file-preview-image', 'title' => $caption]);
-                }
-            }
-        }
-        return $initial;
-    }
-
-    public static function uploadMultiple($id, $model, $attribute, $files = []) {
+    public static function uploadMultiple($id, $model, $attribute, $attribute_upload = 'upload') {
         $path = self::getCategory() . '/' . $id . '/' . $attribute . '/';
-        $uploads = UploadedFile::getInstances($model, $attribute);
+        $uploads = UploadedFile::getInstances($model, $attribute_upload);
+        self::updateCaption(Yii::$app->request->post());
         if ($uploads !== null) {
             $path_dir = self::createDir($path);
+            $files = explode(',', $model[$attribute]);
             foreach ($uploads as $file) {
                 try {
                     $old_name = $file->basename . '.' . $file->extension;
@@ -104,6 +81,7 @@ class File extends \yii\db\ActiveRecord {
                         $f->name = $new_name;
                         $f->filename = $old_name;
                         $f->extension = $file->extension;
+                        $f->caption = $file->basename;
                         $f->type = $file->type;
                         $f->size = $file->size;
                         $f->path = $path;
@@ -115,9 +93,38 @@ class File extends \yii\db\ActiveRecord {
                     
                 }
             }
-            return array_unique(array_filter($files));
+            return implode(',', array_unique(array_filter($files)));
         }
-        return $files;
+
+        return $model[$attribute];
+    }
+
+    private static function updateCaption($post=[]) {
+        $captions = empty($post['file_caption'])?'':$post['file_caption'];
+        if (!empty($captions)) {
+            foreach ($captions as $key => $caption){
+                $f=self::findFile($key);
+                $f->caption=$caption;
+                $f->save();
+            }
+        }
+    }
+
+    public static function format($bytes) {
+        if ($bytes >= 1073741824) {
+            $bytes = number_format($bytes / 1073741824, 2) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            $bytes = number_format($bytes / 1048576, 2) . ' MB';
+        } elseif ($bytes >= 1024) {
+            $bytes = number_format($bytes / 1024, 2) . ' KB';
+        } elseif ($bytes > 1) {
+            $bytes = $bytes . ' bytes';
+        } elseif ($bytes == 1) {
+            $bytes = $bytes . ' byte';
+        } else {
+            $bytes = '0 bytes';
+        }
+        return $bytes;
     }
 
     public function createDir($folder) {
@@ -145,7 +152,7 @@ class File extends \yii\db\ActiveRecord {
         return $category;
     }
 
-    protected function findFile($id) {
+    public static function findFile($id) {
         if (($model = File::findOne($id)) !== null) {
             $model->url = self::getUrl() . $model->path . $model->name;
             return $model;

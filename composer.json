@@ -22,7 +22,8 @@
         "yiisoft/yii2-jui": "^2.0",
         "kartik-v/yii2-widget-select2": "@dev",
         "kartik-v/yii2-widgets": "*",
-        "yii2mod/yii2-rbac": "*"
+        "yii2mod/yii2-rbac": "*",
+        "kartik-v/yii2-sortable-input": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

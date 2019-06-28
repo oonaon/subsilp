@@ -72,7 +72,7 @@ $form = ActiveForm::begin([
 
 <div class="row">
     <?= $form->field($model, 'postcode', ['options' => ['class' => 'col-xs-6 col-md-4']])->textInput(['maxlength' => true, 'id' => 'ddl-postcode']) ?>
-    <?= $form->field($model, 'district', ['options' => ['class' => 'col-xs-6 col-md-8']])->dropDownDependent('ddl-postcode',Area::getDistricts($model->postcode) , ['id' => 'ddl-district', 'prompt' => Yii::t('backend/general', 'select')]) ?>
+    <?= $form->field($model, 'district', ['options' => ['class' => 'col-xs-6 col-md-8']])->dropDownDependent('ddl-postcode', Area::getDistricts($model->postcode), ['area/postcode', 'val' => '{val}'], ['id' => 'ddl-district', 'prompt' => Yii::t('backend/general', 'select')]) ?>
     <?= $form->field($model, 'address', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2]) ?>
 </div>
 

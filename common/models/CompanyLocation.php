@@ -23,6 +23,8 @@ use common\models\AreaDistricts;
 class CompanyLocation extends \yii\db\ActiveRecord {
 
     const UPLOAD_FOLDER = 'images';
+    
+    public $upload;
 
     /**
      * {@inheritdoc}
@@ -39,10 +41,10 @@ class CompanyLocation extends \yii\db\ActiveRecord {
             [['company_id', 'address', 'district', 'postcode'], 'required'],
             [['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             [['company_id', 'contact_id', 'item_default', 'item_fix', 'district'], 'integer'],
-            [['address', 'memo', 'contact'], 'string'],
+            [['address', 'memo', 'contact','map'], 'string'],
             [['postcode'], 'string', 'max' => 5],
             [['postcode'], 'number'],
-            [['map'], 'file', 'maxFiles' => 3],
+            [['upload'], 'file', 'maxFiles' => 3,'skipOnEmpty' => true, 'extensions' => ['jpg','png']],
         ];
     }
 
@@ -61,6 +63,7 @@ class CompanyLocation extends \yii\db\ActiveRecord {
             'province' => Yii::t('common/model', 'province'),
             'postcode' => Yii::t('common/model', 'postcode'),
             'map' => Yii::t('common/model', 'map'),
+            'upload' => Yii::t('common/model', 'upload'),
             'memo' => Yii::t('common/model', 'memo'),
             'item_default' => Yii::t('common/model', 'item_default'),
             'item_fix' => Yii::t('common/model', 'item_fix'),
@@ -68,7 +71,7 @@ class CompanyLocation extends \yii\db\ActiveRecord {
     }
 
     public function beforeSave($insert) {
-        $this->map = implode(',', $this->map);
+       // $this->map = implode(',', $this->map);
         $district = AreaDistricts::findOne($this->district);
         if (empty($district)) {
             $this->district = 0;
@@ -82,7 +85,7 @@ class CompanyLocation extends \yii\db\ActiveRecord {
     }
 
     public function afterFind() {
-        $this->map = explode(',', $this->map);
+       // $this->map = explode(',', $this->map);
         return parent::afterFind();
     }
 
