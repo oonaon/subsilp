@@ -37,35 +37,35 @@ class CActiveField extends ActiveField {
         return $this->dropDownList($items, $options);
     }
 
-    public function file($options = [['width' => '100', 'height' => '100']]) {
+    public function file($options = []) {
         $model = $this->model;
-        $data = $model[$this->attribute];
+        $attribute = $this->attribute;
+        $data = $model[$attribute];
+        $items = [];
         if (!empty($data)) {
             $data = explode(',', $data);
-            $items = [];
             foreach ($data as $id) {
                 $f = File::findFile($id);
-                $caption = empty($f->caption) ? $f->filename : $f->caption;
 
                 $content = '<div class="row">';
 
                 $content .= '<div class="col-xs-2">';
-                $content .= Html::img($f->url, ['class' => 'img-thumbnail float-left']);
+                $content .= File::icon($f->url, $f->url, $f->caption, 'file_preview', ['class' => 'img-thumbnail float-left']);
                 $content .= '</div>';
 
                 $content .= '<div class="col-xs-10">';
-                $content .= Html::input('text', 'file_caption[' . $id . ']', $caption, ['id' => 'file_caption_id_' . $id, 'class' => 'form-control', 'disabled' => true]);
+                $content .= Html::input('text', $attribute . '_file_caption[' . $id . ']', $f->caption, ['id' => $attribute . '_file_caption_id_' . $id, 'class' => 'form-control', 'disabled' => true]);
 
                 $content .= '<div class="btn-group pull-right">
-                                <button type="button" class="btn btn-default" data-enabled="' . $id . '"><i class="fa fa-pencil"></i></button>  
-                                <button type="button" class="btn btn-default"><i class="fa fa-eye"></i></button> 
-                                <button type="button" class="btn btn-default handle" draggable="true"><i class="fa fa-arrows"></i></button> 
-                                <button type="button" class="btn btn-default" data-widget="remove"><i class="fa fa-trash"></i></button> 
+                                <a id="file_download_' . $id . '" href="' . $f->url . '" class="btn btn-default" download><i class="fa fa-download"></i></a>
+                                <button id="file_edit_' . $id . '" type="button" class="btn btn-default" data-enabled="' . $id . '"><i class="fa fa-pencil"></i></button>  
+                                <button id="file_move_' . $id . '" type="button" class="btn btn-default handle" draggable="true" style="display: none;"><i class="fa fa-arrows"></i></button> 
+                                <button id="file_delete_' . $id . '" type="button" class="btn btn-default" data-widget="remove" style="display: none;"><i class="fa fa-trash"></i></button> 
                             </div>';
 
 
                 //$content .= '<b>' . $f->filename . '</b>';
-                $content .= '<span class="text-sm pull-left">' . File::format($f->size) . '</span> ';
+                $content .= '<span class="text-sm pull-left">' . strtoupper($f->extension) . ' / ' . File::format($f->size) . '</span> ';
 
                 $content .= '</div>';
 
@@ -77,8 +77,10 @@ class CActiveField extends ActiveField {
             $this->form->getView()->registerJs('
                 $("#' . $input_id . '-sortable button[data-enabled]").click(function(e) {
                     file_id=$(this).data("enabled");
-                    $("#file_caption_id_"+file_id).prop( "disabled", false );
-                    $(this).prop( "disabled", true );
+                    $("#' . $attribute . '_file_caption_id_"+file_id).prop( "disabled", false );
+                    $("#file_move_"+file_id).prop( "style", false );                    
+                    $("#file_delete_"+file_id).prop( "style", false );
+                    $(this).prop( "style", "display: none;" );
                 });
                 
                 $("#' . $input_id . '-sortable button[data-widget=\"remove\"]").click(function(e) {
@@ -88,24 +90,28 @@ class CActiveField extends ActiveField {
                         items.push($(this).attr("data-key"));
                     });
                     if(items.length==0){
-                        $("#' . $input_id . '-sortable").append("<li draggable=\"false\" >' . Yii::t('backend/general', 'not_found') . '</li>");
+                        $("#' . $input_id . '-sortable").append("<li>' . Yii::t('backend/general', 'not_found') . '</li>");
                         $("#' . $input_id . '").val("");
                     } else {
                         $("#' . $input_id . '").val(items.join(","));
                     }
                 });
             ', \yii\web\View::POS_READY);
-
-            return $this->widget(SortableInput::classname(), [
-                        'items' => $items,
-                        'hideInput' => true,
-                        'sortableOptions' => [
-                            'showHandle' => true,
-                            'handleLabel' => false,
-                        ],
-            ]);
         }
-        return false;
+        if (empty($items)) {
+            $items[] = ['content' => Yii::t('backend/general', 'not_found')];
+        }
+        echo $this->widget(SortableInput::classname(), [
+            'items' => $items,
+            'hideInput' => true,
+            'sortableOptions' => [
+                'showHandle' => true,
+                'handleLabel' => false,
+            ],
+        ]);
+        $this->attribute = $this->attribute . "_upload[]";
+        $label = $model->attributeLabels();
+        return $this->fileInput($options)->label(Yii::t('common/model', 'upload') . $label[$attribute]);
     }
 
     private function getID($options) {

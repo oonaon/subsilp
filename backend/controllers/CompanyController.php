@@ -122,10 +122,8 @@ class CompanyController extends Controller {
             $model_location->contact_id = $contact_default->id;
         }
         $model_location->company_id = $id;
-
         if ($model_location->load(Yii::$app->request->post())) {
             $model_location->map = File::uploadMultiple($id, $model_location, 'map');
-
             if ($model_location->save()) {
                 return $this->redirect(['location', 'id' => $id]);
             }
@@ -138,11 +136,12 @@ class CompanyController extends Controller {
 
     public function actionLocation_update($id, $sid) {
         $this->layout = 'main_tab';
-        $model_location = CompanyLocation::findOne($sid);        
+        $model_location = CompanyLocation::findOne($sid);   
+        $old_map=$model_location->map;
         if ($model_location->load(Yii::$app->request->post())) {
-            $model_location->map = File::uploadMultiple($id, $model_location, 'map', 'upload');
+            File::deleteFileDifferent($old_map,$model_location->map);
+            $model_location->map = File::uploadMultiple($id, $model_location, 'map');
             if ($model_location->save()) {
-                $pos = Yii::$app->request->post();
                 return $this->redirect(['location', 'id' => $id]);
             }
         }

@@ -37,10 +37,8 @@ if ($model_location->item_fix) {
 
     <?= $form->field($model_location, 'memo', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2]) ?>
 
-    <?= $form->field($model_location, 'map', ['options' => ['class' => 'col-xs-12']])->file() ?>
-
-    <?= $form->field($model_location, 'upload[]', ['options' => ['class' => 'col-xs-6 col-md-4']])->fileInput(['multiple' => true, 'accept' => 'image/*']) ?>
-
+    <?= $form->field($model_location, 'map', ['options' => ['class' => 'col-xs-12']])->file(['multiple' => true, 'accept' => 'image/*']) ?>
+    
 </div>
 
 <?php

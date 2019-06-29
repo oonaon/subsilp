@@ -64,19 +64,21 @@ class File extends \yii\db\ActiveRecord {
         ];
     }
 
-    public static function uploadMultiple($id, $model, $attribute, $attribute_upload = 'upload') {
+    public static function uploadMultiple($id, $model, $attribute) {
         $path = self::getCategory() . '/' . $id . '/' . $attribute . '/';
-        $uploads = UploadedFile::getInstances($model, $attribute_upload);
-        self::updateCaption(Yii::$app->request->post());
+        $uploads = UploadedFile::getInstances($model, $attribute . '_upload');
+        self::updateCaption(Yii::$app->request->post(), $attribute);
         if ($uploads !== null) {
             $path_dir = self::createDir($path);
             $files = explode(',', $model[$attribute]);
             foreach ($uploads as $file) {
                 try {
+                    $next_id = File::find()->max('id') + 1;
                     $old_name = $file->basename . '.' . $file->extension;
-                    $new_name = md5($file->basename . time()) . '.' . $file->extension;
+                    $new_name = $next_id . '_' . md5($file->basename . time()) . '.' . $file->extension;
                     if ($file->saveAs($path_dir . $new_name)) {
                         $f = new File;
+                        $f->id = $next_id;
                         $f->category = self::getCategory();
                         $f->name = $new_name;
                         $f->filename = $old_name;
@@ -95,16 +97,78 @@ class File extends \yii\db\ActiveRecord {
             }
             return implode(',', array_unique(array_filter($files)));
         }
-
         return $model[$attribute];
     }
 
-    private static function updateCaption($post=[]) {
-        $captions = empty($post['file_caption'])?'':$post['file_caption'];
+    public static function img($url, $options = []) {
+        $arr = explode('.', $url);
+        $ext = end($arr);
+        $path_icon = Url::base(true) . '/images/icons/';
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif'])) {
+            
+        } else if ($ext == 'rar') {
+            $url = $path_icon . 'zip.png';
+        } else if ($ext == 'docx') {
+            $url = $path_icon . 'doc.png';
+        } else {
+            $url = $path_icon . $ext . '.png';
+        }
+        return Html::img($url, $options);
+    }
+
+    public static function icon($url, $link = '', $caption='', $preview_group='file_preview', $options_img = [], $options_link = []) {
+        $arr = explode('.', $url);
+        $ext = end($arr);
+        $path_icon = Url::base(true) . '/images/icons/';
+        
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif'])) {
+            $download = false;
+        } else if ($ext == 'pdf') {
+            $url = $path_icon . 'pdf.png';
+            $download = false;
+        } else if ($ext == 'doc' || $ext == 'docx') {
+            $url = $path_icon . 'doc.png';
+            $download = true;
+        } else {
+            $url = $path_icon . $ext . '.png';
+            $download = true;
+        }
+        if ($download) { // download
+            $options_link['download'] = empty($caption)?true:$caption;
+        } else {        // preview with fancybox
+            $options_link['data-fancybox']=$preview_group;
+            $options_link['data-caption']=$caption;
+        }
+        return Html::a(Html::img($url, $options_img), $link, $options_link);
+    }
+
+    public static function deleteFileDifferent($old_files, $new_files) {
+        $old = explode(',', trim($old_files));
+        $new = explode(',', trim($new_files));
+        $diffs = array_diff($old, $new);
+        if (!empty($diffs)) {
+            foreach ($diffs as $diff) {
+                self::deleteFile($diff);
+            }
+        }
+    }
+
+    public static function deleteFile($id) {
+        if (!empty($id)) {
+            $f = self::findFile($id);
+            $path_file = self::getDir() . $f->path . $f->name;
+            if (unlink($path_file)) {
+                $f->delete();
+            }
+        }
+    }
+
+    private static function updateCaption($post = [], $attribute) {
+        $captions = empty($post[$attribute . '_file_caption']) ? '' : $post[$attribute . '_file_caption'];
         if (!empty($captions)) {
-            foreach ($captions as $key => $caption){
-                $f=self::findFile($key);
-                $f->caption=$caption;
+            foreach ($captions as $key => $caption) {
+                $f = self::findFile($key);
+                $f->caption = trim($caption);
                 $f->save();
             }
         }

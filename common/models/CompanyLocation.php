@@ -24,7 +24,7 @@ class CompanyLocation extends \yii\db\ActiveRecord {
 
     const UPLOAD_FOLDER = 'images';
     
-    public $upload;
+    public $map_upload;
 
     /**
      * {@inheritdoc}
@@ -44,7 +44,7 @@ class CompanyLocation extends \yii\db\ActiveRecord {
             [['address', 'memo', 'contact','map'], 'string'],
             [['postcode'], 'string', 'max' => 5],
             [['postcode'], 'number'],
-            [['upload'], 'file', 'maxFiles' => 3,'skipOnEmpty' => true, 'extensions' => ['jpg','png']],
+            [['map_upload'], 'file', 'maxFiles' => 10,'skipOnEmpty' => true, 'extensions' => ['jpg','png','pdf','zip','ai']],
         ];
     }
 
@@ -63,7 +63,6 @@ class CompanyLocation extends \yii\db\ActiveRecord {
             'province' => Yii::t('common/model', 'province'),
             'postcode' => Yii::t('common/model', 'postcode'),
             'map' => Yii::t('common/model', 'map'),
-            'upload' => Yii::t('common/model', 'upload'),
             'memo' => Yii::t('common/model', 'memo'),
             'item_default' => Yii::t('common/model', 'item_default'),
             'item_fix' => Yii::t('common/model', 'item_fix'),
