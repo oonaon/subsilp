@@ -9,6 +9,7 @@ use yii\helpers\Json;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\helpers\Html;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "file".
@@ -21,7 +22,7 @@ use yii\helpers\Html;
  * @property string $extension
  * @property int $size
  */
-class File extends \yii\db\ActiveRecord {
+class File extends CActiveRecord {
 
     const UPLOAD_FOLDER = 'files';
 

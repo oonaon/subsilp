@@ -6,6 +6,7 @@ use Yii;
 use common\models\AreaDistricts;
 use common\models\CompanyLocation;
 use common\models\Area;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "company".
@@ -36,7 +37,7 @@ use common\models\Area;
  * @property string $rank
  * @property string $status
  */
-class Company extends \yii\db\ActiveRecord {
+class Company extends CActiveRecord {
 
     /**
      * {@inheritdoc}
@@ -51,7 +52,7 @@ class Company extends \yii\db\ActiveRecord {
     public function rules() {
         return [
             [['org', 'code', 'name', 'type'], 'required'],
-            //[['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
+            [['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             ['code', 'unique', 'targetAttribute' => ['code']],
             [['branch', 'credit', 'salesman', 'district'], 'integer'],
             [['branch', 'credit', 'salesman'], 'default', 'value' => 0],
@@ -121,7 +122,6 @@ class Company extends \yii\db\ActiveRecord {
     }
 
     public function beforeSave($insert) {
-
         $this->org = implode(',', $this->org);
         $this->type = implode(',', $this->type);
 
@@ -134,16 +134,13 @@ class Company extends \yii\db\ActiveRecord {
             $this->amphure = $district->amphure_id;
             $this->province = $district->amphure->province_id;
         }
-
         return parent::beforeSave($insert);
     }
 
     public function afterFind() {
-
+        parent::afterFind();
         $this->org = explode(',', $this->org);
         $this->type = explode(',', $this->type);
-
-        return parent::afterFind();
     }
 
     public function getContacts() {

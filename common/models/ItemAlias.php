@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "item_alias".
@@ -14,7 +15,7 @@ use Yii;
  * @property double $order_num
  * @property int $status
  */
-class ItemAlias extends \yii\db\ActiveRecord {
+class ItemAlias extends CActiveRecord {
 
     const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 1;

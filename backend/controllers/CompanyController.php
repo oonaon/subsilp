@@ -78,10 +78,12 @@ class CompanyController extends Controller {
     public function actionUpdate($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
+        
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $model->updateLocation();
             return $this->redirect(['view', 'id' => $model->id]);
         }
+        
         return $this->render('/company/item', [
                     'model' => $model,
                     'company_type' => $this->company_type,

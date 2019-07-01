@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "organize".
@@ -24,8 +25,7 @@ use Yii;
  * @property string $postcode
  * @property string $line
  */
-class Organize extends \yii\db\ActiveRecord
-{
+class Organize extends CActiveRecord {
     /**
      * {@inheritdoc}
      */

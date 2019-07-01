@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "message_source".
@@ -13,7 +14,7 @@ use Yii;
  *
  * @property Message[] $messages
  */
-class MessageSource extends \yii\db\ActiveRecord {
+class MessageSource extends CActiveRecord {
 
     public $lang_th, $lang_en;
 

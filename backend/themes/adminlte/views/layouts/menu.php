@@ -39,25 +39,7 @@ $action = Yii::$app->controller->action->id;
                         //['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                         // ****** MAIN MENU ******
                         ['label' => Yii::t('backend/menu', 'main'), 'options' => ['class' => 'header']],
-                        // BUY MENU
-                        [
-                            'label' => Yii::t('backend/menu', 'buy'),
-                            'icon' => 'cart-arrow-down',
-                            'url' => '#',
-                            'items' => [
-                                ['label' => Yii::t('backend/menu', 'supplier'), 'icon' => 'file-code-o', 'url' => ['/supplier/index'], 'active' => ($controller == 'supplier' ? true : false)],
-                                ['label' => 'buy 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
-                                [
-                                    'label' => 'buy 3',
-                                    'icon' => 'circle-o',
-                                    'url' => '#',
-                                    'items' => [
-                                        ['label' => 'sub buy 1', 'icon' => 'circle-o', 'url' => '#',],
-                                        ['label' => 'sub buy 2', 'icon' => 'circle-o', 'url' => '#',],
-                                    ],
-                                ],
-                            ],
-                        ],
+                        
                         // SELL MENU
                         [
                             'label' => Yii::t('backend/menu', 'sell'),
@@ -73,6 +55,25 @@ $action = Yii::$app->controller->action->id;
                                     'items' => [
                                         ['label' => 'sub sell 1', 'icon' => 'circle-o', 'url' => '#',],
                                         ['label' => 'sub sell 2', 'icon' => 'circle-o', 'url' => '#',],
+                                    ],
+                                ],
+                            ],
+                        ],
+                        // BUY MENU
+                        [
+                            'label' => Yii::t('backend/menu', 'buy'),
+                            'icon' => 'cart-arrow-down',
+                            'url' => '#',
+                            'items' => [
+                                ['label' => Yii::t('backend/menu', 'supplier'), 'icon' => 'file-code-o', 'url' => ['/supplier/index'], 'active' => ($controller == 'supplier' ? true : false)],
+                                ['label' => 'buy 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
+                                [
+                                    'label' => 'buy 3',
+                                    'icon' => 'circle-o',
+                                    'url' => '#',
+                                    'items' => [
+                                        ['label' => 'sub buy 1', 'icon' => 'circle-o', 'url' => '#',],
+                                        ['label' => 'sub buy 2', 'icon' => 'circle-o', 'url' => '#',],
                                     ],
                                 ],
                             ],

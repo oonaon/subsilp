@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use common\models\AreaDistricts;
+use common\components\CActiveRecord;
 
 /**
  * This is the model class for table "company_location".
@@ -20,7 +21,7 @@ use common\models\AreaDistricts;
  * @property string $memo
  * @property int $item_default
  */
-class CompanyLocation extends \yii\db\ActiveRecord {
+class CompanyLocation extends CActiveRecord {
 
     const UPLOAD_FOLDER = 'images';
     
