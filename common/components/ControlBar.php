@@ -191,13 +191,6 @@ class ControlBar extends Widget {
             }
         }
 
-        /*
-          $buttons = [
-          [$btn['index'], $btn['search']],
-          [$btn['add'], $btn['update'], $btn['save'], $btn['cancel'], $btn['delete']],
-          [$btn['first'], $btn['previous'], $btn['next'], $btn['last']],
-          ];
-         */
         $buttons = [];
         if (!empty($this->button)) {
             foreach ($this->button as $key => $item) {
@@ -216,6 +209,7 @@ class ControlBar extends Widget {
         }
         return $this->render('@app/widgets/controlbar', [
                     'buttons' => $buttons,
+                    'prefix'=>self::getPrefixCode(),
         ]);
     }
 

@@ -6,6 +6,7 @@ use Yii;
 use common\models\AreaDistricts;
 use common\models\CompanyLocation;
 use common\models\Area;
+use common\models\ItemAlias;
 use common\components\CActiveRecord;
 
 /**
@@ -152,7 +153,7 @@ class Company extends CActiveRecord {
         $this->org = explode(',', $this->org);
         $this->type = explode(',', $this->type);
     }
-    
+
     public function beforeDelete() {
         File::deleteFileAll($this->files);
         File::deleteDir($id);
@@ -162,17 +163,44 @@ class Company extends CActiveRecord {
     public function getContacts() {
         return $this->hasMany(CompanyContact::className(), ['company_id' => 'id']);
     }
-    
-    public static function getTypeFromController(){
-        $controller=Yii::$app->controller->id;
-        if($controller=='customer'){
-            $type='cus';
-        } else if($controller=='supplier'){
-            $type='sup';
-        } else if($controller=='manufacturer'){
-            $type='man';
+
+    public function getFullName($full = false) {
+        $kind_name = ItemAlias::getLabel('company_kind', $this->kind);
+        if ($this->kind == 1) {
+            if ($full) {
+                return Yii::t('common/general', 'prefix_co_ltd') . ' ' . $this->name . ' ' . Yii::t('common/general', 'suffix_co_ltd');
+            } else {
+                return $kind_name . ' ' . $this->name;
+            }
+        } else if ($this->kind == 2) {
+            if ($full) {
+                return Yii::t('common/general', 'prefix_part_ltd') . ' ' . $this->name . ' ' . Yii::t('common/general', 'suffix_part_ltd');
+            } else {
+                return $kind_name . ' ' . $this->name;
+            }
+        } else if ($this->kind == 3) {
+            if ($full) {
+                return Yii::t('common/general', 'prefix_pub_ltd') . ' ' . $this->name . ' ' . Yii::t('common/general', 'suffix_pub_ltd');
+            } else {
+                return $kind_name . ' ' . $this->name;
+            }
+        } else if ($this->kind == 4) {
+            return $kind_name . $this->name;
         } else {
-            $type=$controller;
+            return $this->name;
+        }
+    }
+
+    public static function getTypeFromController() {
+        $controller = Yii::$app->controller->id;
+        if ($controller == 'customer') {
+            $type = 'cus';
+        } else if ($controller == 'supplier') {
+            $type = 'sup';
+        } else if ($controller == 'manufacturer') {
+            $type = 'man';
+        } else {
+            $type = $controller;
         }
         return $type;
     }

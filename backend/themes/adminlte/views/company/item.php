@@ -37,7 +37,7 @@ $this->params['panel'] = [
     'tabs' => $tabs,
     'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? true : false,
     'disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? false : true,
-    'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->name,
+    'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->code.' - '.$model->getFullName(true),
     'button' => $button,
 ];
 

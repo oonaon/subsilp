@@ -18,12 +18,6 @@ $panel['button']=(empty($panel['button']))?'':$panel['button'];
         <div class="box-header">  
             <nav class="navbar navbar-default" style="margin-bottom: 10px;">
                 <div class="navbar-header">
-                    
-                    <div class="btn-group pull-left" style="margin-left: 10px;">
-                        <a class="btn btn-default btn-sm navbar-btn" href="#"><i class="fa fa-angle-left"></i></a>
-                    </div>
-                    
-                    
                     <?php
                     if (count($panel['tabs']) > 0) {
                         ?>
@@ -33,14 +27,7 @@ $panel['button']=(empty($panel['button']))?'':$panel['button'];
                         <?php
                     }
                     ?>
-                    <span class="navbar-brand"><?= $panel['title'] ?></span>
-
-                    
-                    <div class="btn-group pull-right">
-                        <a class="btn btn-default btn-sm navbar-btn" href="#"><i class="fa fa-angle-right"></i></a>
-                    </div>
-                    
-                    
+                    <span class="navbar-brand"><?= $panel['title'] ?></span>   
                 </div>
                 
                 <div class="collapse navbar-collapse" id="panel_nav">

@@ -71,7 +71,7 @@ $form = ActiveForm::begin([
             'action' => ['find'],
         ]);
 
-echo Html::textInput('find_code', '', ['class' => 'form-control']);
+echo Html::textInput('find_code', $prefix, ['class' => 'form-control']);
 $this->registerJs('$("#btn-model-search").click(function(){$("#form-search-model").submit();});', \yii\web\View::POS_READY);
 ActiveForm::end();
 Modal::end();

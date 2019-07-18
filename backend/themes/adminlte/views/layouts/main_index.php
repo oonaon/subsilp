@@ -15,13 +15,13 @@ use common\components\Button;
 
     <div class="box">
         <div class="box-header">
-
+            <?php /*
             <nav class="navbar navbar-default" style="margin-bottom: 10px;">
                 <div class="navbar-header">
                     <span class="navbar-brand">รายการ</span>
                 </div>
             </nav>
-
+            */ ?>
             <?= ControlBar::widget() ?>  
 
         </div>

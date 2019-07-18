@@ -1,10 +1,11 @@
 <?php
+
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use common\models\ItemAlias;
 use common\components\CustomColumn;
 
-$controller=Yii::$app->controller->id;
+$controller = Yii::$app->controller->id;
 if ($controller == 'customer') {
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
