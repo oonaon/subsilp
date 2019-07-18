@@ -37,6 +37,9 @@ if ($model_location->item_fix) {
 
     <?= $form->field($model_location, 'memo', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2]) ?>
 
+    <?= $form->field($model_location, 'latitude', ['options' => ['class' => 'col-xs-12 col-md-6']])->textInput() ?>
+    <?= $form->field($model_location, 'longitude', ['options' => ['class' => 'col-xs-12 col-md-6']])->textInput() ?>
+    
     <?= $form->field($model_location, 'map', ['options' => ['class' => 'col-xs-12']])->file(['multiple' => true, 'accept' => 'image/*']) ?>
     
 </div>

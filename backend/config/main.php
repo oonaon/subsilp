@@ -89,11 +89,17 @@ return [
                     'update' => function($url, $model) {
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'method' => 'post',
+                                    ],
                         ]);
                     },
                     'view' => function($url, $model) {
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
+                                    'data' => [
+                                        'method' => 'post',
+                                    ],
                         ]);
                     },
                     'modal' => function($url, $model) {
@@ -152,6 +158,13 @@ return [
             ],
             yii\data\Pagination::class => [
                 'defaultPageSize' => 15,
+            ],
+            yii\widgets\LinkPager::class=>[
+                'options' => ['class' => 'pagination pagination-sm no-margin pull-right'],
+                'prevPageLabel' => '<i class="fa fa-angle-left"></i>',
+                'nextPageLabel' => '<i class="fa fa-angle-right"></i>',
+                'firstPageLabel' => '<i class="fa fa-angle-double-left"></i>',
+                'lastPageLabel' => '<i class="fa fa-angle-double-right"></i>',
             ],
         ],
     ],

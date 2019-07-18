@@ -39,6 +39,8 @@ use common\components\CActiveRecord;
  */
 class Company extends CActiveRecord {
 
+    public $files_upload;
+
     /**
      * {@inheritdoc}
      */
@@ -52,18 +54,25 @@ class Company extends CActiveRecord {
     public function rules() {
         return [
             [['org', 'code', 'name', 'type'], 'required'],
-            [['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
+            ['district', 'required',
+                'when' => function($model) {
+                    return !empty($model->postcode);
+                },
+                'isEmpty' => function ($value) {
+                    return empty($value) || !is_numeric($value);
+                }],
+            //[['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             ['code', 'unique', 'targetAttribute' => ['code']],
-            [['branch', 'credit', 'salesman', 'district'], 'integer'],
+            [['branch', 'credit', 'salesman'], 'integer'],
             [['branch', 'credit', 'salesman'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 1],
-            [['address', 'payment', 'memo', 'transport_note'], 'string'],
+            [['address', 'payment', 'memo', 'transport_note', 'files'], 'string'],
             [['postcode', 'transport', 'rank', 'status'], 'string', 'max' => 5],
-            [['postcode'], 'number'],
             [['code', 'kind'], 'string', 'max' => 20],
             [['name', 'tel', 'fax', 'email', 'website'], 'string', 'max' => 100],
             [['tax'], 'string', 'max' => 13],
             [['email'], 'email'],
+            [['files_upload'], 'file', 'maxFiles' => 10, 'skipOnEmpty' => true, 'extensions' => ['jpg', 'png', 'pdf', 'zip', 'ai']],
         ];
     }
 
@@ -96,12 +105,13 @@ class Company extends CActiveRecord {
             'transport' => Yii::t('common/model', 'transport'),
             'transport_note' => Yii::t('common/model', 'transport_note'),
             'rank' => Yii::t('common/model', 'rank'),
+            'files' => Yii::t('common/model', 'files'),
             'status' => Yii::t('common/model', 'status'),
         ];
     }
 
     public function fullAddress() {
-        return Area::fullAddress($this);  
+        return Area::fullAddress($this);
     }
 
     public function updateLocation() {
@@ -118,7 +128,7 @@ class Company extends CActiveRecord {
         $model_location->amphure = $this->amphure;
         $model_location->province = $this->province;
         $model_location->postcode = $this->postcode;
-        return $model_location->save();
+        return $model_location->save(false);
     }
 
     public function beforeSave($insert) {
@@ -142,9 +152,29 @@ class Company extends CActiveRecord {
         $this->org = explode(',', $this->org);
         $this->type = explode(',', $this->type);
     }
+    
+    public function beforeDelete() {
+        File::deleteFileAll($this->files);
+        File::deleteDir($id);
+        return parent::beforeDelete();
+    }
 
     public function getContacts() {
         return $this->hasMany(CompanyContact::className(), ['company_id' => 'id']);
+    }
+    
+    public static function getTypeFromController(){
+        $controller=Yii::$app->controller->id;
+        if($controller=='customer'){
+            $type='cus';
+        } else if($controller=='supplier'){
+            $type='sup';
+        } else if($controller=='manufacturer'){
+            $type='man';
+        } else {
+            $type=$controller;
+        }
+        return $type;
     }
 
 }

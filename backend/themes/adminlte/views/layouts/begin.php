@@ -9,6 +9,12 @@ if (class_exists('backend\assets\AppAsset')) {
 }
 dmstr\web\AdminLteAsset::register($this);
 $this->params['directory_asset'] = Yii::$app->assetManager->getPublishedUrl('@vendor/almasaeed2010/adminlte/dist');
+
+if(!empty($this->params['panel']['title'])){
+    $this->title = $this->params['panel']['title'].' / '.$this->params['title'];
+} else if(!empty($this->params['title'])) {
+    $this->title = $this->params['title'];
+}
 ?>
 
 <!DOCTYPE html>

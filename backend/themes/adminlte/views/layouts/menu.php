@@ -103,6 +103,8 @@ $action = Yii::$app->controller->action->id;
                             'icon' => 'cube',
                             'url' => '#',
                             'items' => [
+                                ['label' => Yii::t('backend/menu', 'product'), 'icon' => 'file-code-o', 'url' => ['/product/index'], 'active' => ($controller == 'product' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'product_category'), 'icon' => 'file-code-o', 'url' => ['/product_category/index'], 'active' => ($controller == 'product_category' ? true : false)],
                                 ['label' => 'product 1', 'icon' => 'file-code-o', 'url' => ['/gii'],],
                                 ['label' => 'product 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [

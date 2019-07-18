@@ -10,6 +10,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use common\components\CActiveRecord;
+use yii\web\NotFoundHttpException;
+use yii\imagine\Image;
 
 /**
  * This is the model class for table "file".
@@ -25,8 +27,15 @@ use common\components\CActiveRecord;
 class File extends CActiveRecord {
 
     const UPLOAD_FOLDER = 'files';
+    const ORIGINAL_FOLDER = 'original';
+    const IMAGE_SIZE = [
+        'thumbnail' => ['w' => 200, 'h' => 150, 'ratio' => false],
+        'medium' => ['w' => 400, 'h' => 400, 'ratio' => true],
+        'large' => ['w' => 800, 'h' => 800, 'ratio' => true],
+        'full' => ['w' => 3600, 'h' => 3600, 'ratio' => true],
+    ];
 
-    public $url;
+    public $dir, $url, $link, $thumbnail, $images;
 
     /**
      * {@inheritdoc}
@@ -65,12 +74,15 @@ class File extends CActiveRecord {
         ];
     }
 
-    public static function uploadMultiple($id, $model, $attribute) {
+    public static function uploadMultiple($id, $model, $attribute, $old_files = []) {
         $path = self::getCategory() . '/' . $id . '/' . $attribute . '/';
         $uploads = UploadedFile::getInstances($model, $attribute . '_upload');
         self::updateCaption(Yii::$app->request->post(), $attribute);
+        if (!empty($old_files)) {
+            self::deleteFileDifferent($old_files, $model[$attribute]);
+        }
         if ($uploads !== null) {
-            $path_dir = self::createDir($path);
+            $path_dir = self::createDir(self::ORIGINAL_FOLDER . '/' . $path);
             $files = explode(',', $model[$attribute]);
             foreach ($uploads as $file) {
                 try {
@@ -101,46 +113,23 @@ class File extends CActiveRecord {
         return $model[$attribute];
     }
 
-    public static function img($url, $options = []) {
-        $arr = explode('.', $url);
-        $ext = end($arr);
-        $path_icon = Url::base(true) . '/images/icons/';
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif'])) {
-            
-        } else if ($ext == 'rar') {
-            $url = $path_icon . 'zip.png';
-        } else if ($ext == 'docx') {
-            $url = $path_icon . 'doc.png';
+    public function icon($group = 'file_preview', $options_img = [], $options_link = []) {
+        if ($this->getFileType() == 'image' || $this->extension == 'pdf') {
+            $options_link['data-fancybox'] = $group;
+            $options_link['data-caption'] = $this->caption;
         } else {
-            $url = $path_icon . $ext . '.png';
+            $options_link['download'] = empty($this->caption) ? true : $this->caption;
         }
-        return Html::img($url, $options);
+        return Html::a(Html::img($this->thumbnail, $options_img), $this->link, $options_link);
     }
 
-    public static function icon($url, $link = '', $caption='', $preview_group='file_preview', $options_img = [], $options_link = []) {
-        $arr = explode('.', $url);
-        $ext = end($arr);
-        $path_icon = Url::base(true) . '/images/icons/';
-        
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif'])) {
-            $download = false;
-        } else if ($ext == 'pdf') {
-            $url = $path_icon . 'pdf.png';
-            $download = false;
-        } else if ($ext == 'doc' || $ext == 'docx') {
-            $url = $path_icon . 'doc.png';
-            $download = true;
-        } else {
-            $url = $path_icon . $ext . '.png';
-            $download = true;
+    public static function deleteFileAll($files) {
+        $files = explode(',', trim($files));
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                self::deleteFile($file);
+            }
         }
-        if ($download) { // download
-            $options_link['download'] = empty($caption)?true:$caption;
-        } else {        // preview with fancybox
-            $options_link['data-fancybox']=$preview_group;
-            $options_link['data-caption']=$caption;
-        }
-        return Html::a(Html::img($url, $options_img), $link, $options_link);
     }
 
     public static function deleteFileDifferent($old_files, $new_files) {
@@ -157,8 +146,12 @@ class File extends CActiveRecord {
     public static function deleteFile($id) {
         if (!empty($id)) {
             $f = self::findFile($id);
-            $path_file = self::getDir() . $f->path . $f->name;
-            if (unlink($path_file)) {
+            if ($f->getFileType() == 'image') {
+                foreach ($f->images as $image) {
+                    unlink($image['dir']);
+                }
+            }
+            if (unlink($f->dir)) {
                 $f->delete();
             }
         }
@@ -193,7 +186,7 @@ class File extends CActiveRecord {
     }
 
     public function createDir($folder) {
-        $path = self::getDir() . $folder;
+        $path = self::getDir() . strtolower($folder);
         if (BaseFileHelper::createDirectory($path, 0777)) {
             return $path;
         } else {
@@ -201,12 +194,38 @@ class File extends CActiveRecord {
         }
     }
 
-    public static function getDir() {
-        return Yii::getAlias('@webroot') . '/' . self::UPLOAD_FOLDER . '/';
+    public static function deleteDir($id) {
+        $del = [];
+        foreach (self::IMAGE_SIZE as $key => $size) {
+            $del[] = self::getDir($key) . self::getCategory() . '/' . $id;
+        }
+        $del[] = self::getDir(self::ORIGINAL_FOLDER) . self::getCategory() . '/' . $id;
+        foreach ($del as $path) {
+            $d = dir($path);
+            while (false !== ($entry = $d->read())) {
+                if ($entry != '.' && $entry != '..') {
+                    rmdir($path . '/' . $entry);
+                }
+            }
+            $d->close();
+            rmdir($path);
+        }
     }
 
-    public static function getUrl() {
-        return Url::base(true) . '/' . self::UPLOAD_FOLDER . '/';
+    public static function getDir($folder = '') {
+        $out = Yii::getAlias('@webroot') . '/' . self::UPLOAD_FOLDER . '/';
+        if (!empty($folder)) {
+            $out .= strtolower($folder) . '/';
+        }
+        return $out;
+    }
+
+    public static function getUrl($folder = '') {
+        $out = Url::base(true) . '/' . self::UPLOAD_FOLDER . '/';
+        if (!empty($folder)) {
+            $out .= strtolower($folder) . '/';
+        }
+        return $out;
     }
 
     public static function getCategory() {
@@ -217,9 +236,61 @@ class File extends CActiveRecord {
         return $category;
     }
 
+    public function getFileType() {
+        $arr = explode('/', $this->type);
+        return $arr[0];
+    }
+
+    public function getThumbnail() {
+        if ($this->getFileType() == 'image') {
+            return $this->images['thumbnail']['url'];
+        } else {
+            $ext = $this->extension;
+            if ($ext == 'pdf') {
+                $icon = 'pdf.png';
+            } else if ($ext == 'doc' || $ext == 'docx') {
+                $icon = 'doc.png';
+            } else {
+                $icon = $ext . '.png';
+            }
+            return Url::base(true) . '/images/icons/' . $icon;
+        }
+    }
+
+    public function createImages() {
+        if ($this->getFileType() == 'image') {
+            foreach (self::IMAGE_SIZE as $key => $size) {
+                $path_dir = self::createDir($key . '/' . $this->path);
+                if ($size['ratio']) {
+                    Image::resize($this->dir, $size['w'], $size['h'])->save($path_dir . $this->name);
+                } else {
+                    Image::thumbnail($this->dir, $size['w'], $size['h'])->save($path_dir . $this->name);
+                }
+            }
+        }
+    }
+
     public static function findFile($id) {
         if (($model = File::findOne($id)) !== null) {
-            $model->url = self::getUrl() . $model->path . $model->name;
+            $model->dir = self::getDir(self::ORIGINAL_FOLDER) . $model->path . $model->name;
+            $model->url = self::getUrl(self::ORIGINAL_FOLDER) . $model->path . $model->name;
+            $model->link = $model->url;
+            $images = [];
+            if ($model->getFileType() == 'image') {
+                foreach (self::IMAGE_SIZE as $key => $size) {
+                    $path = $model->path . $model->name;
+                    if (!file_exists(self::getDir($key) . $path)) {
+                        $model->createImages();
+                    }
+                    $images[$key] = [
+                        'url' => self::getUrl($key) . $path,
+                        'dir' => self::getDir($key) . $path,
+                    ];
+                }
+                $model->link = $images['full']['url'];
+            }
+            $model->images = $images;
+            $model->thumbnail = $model->getThumbnail();
             return $model;
         }
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));

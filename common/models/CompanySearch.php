@@ -37,7 +37,9 @@ class CompanySearch extends Company {
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $type) {
+    public function search($params) {
+        $type=Company::getTypeFromController();
+        
         $query = Company::find();
         $session = Yii::$app->session;
 

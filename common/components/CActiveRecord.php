@@ -10,11 +10,11 @@ class CActiveRecord extends \yii\db\ActiveRecord {
 
     public $attribute_old, $attribute_new;
 
-    public function afterFind() {   
+    public function afterFind() {
         parent::afterFind();
         $this->attribute_old = $this->attributes;
     }
-    
+
     public function beforeSave($insert) {
         $this->attribute_new = $this->attributes;
         return parent::beforeSave($insert);
@@ -27,7 +27,7 @@ class CActiveRecord extends \yii\db\ActiveRecord {
 
     public function addEvent($old_attribute, $new_attribute) {
         $diff = self::compare($old_attribute, $new_attribute);
-        
+
         if (!empty($diff)) {
             $e = new Event();
             $e->controller = Yii::$app->controller->id;
@@ -50,6 +50,15 @@ class CActiveRecord extends \yii\db\ActiveRecord {
             }
         }
         return $diff;
+    }
+
+    public function deleteEachAll($condition = null) {
+        $items = self::find()->where($condition)->all();
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $item->delete();
+            }
+        }
     }
 
 }

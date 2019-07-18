@@ -12,7 +12,7 @@ use common\components\CActiveRecord;
  * @property string $category
  * @property string $val
  * @property string $label
- * @property double $order_num
+ * @property double $sort_order
  * @property int $status
  */
 class ItemAlias extends CActiveRecord {
@@ -32,8 +32,8 @@ class ItemAlias extends CActiveRecord {
      */
     public function rules() {
         return [
-            [['category', 'val', 'label', 'order_num', 'status'], 'required'],
-            [['order_num'], 'number'],
+            [['category', 'val', 'label', 'sort_order', 'status'], 'required'],
+            [['sort_order'], 'number'],
             [['status'], 'integer'],
             [['category', 'val', 'label'], 'string', 'max' => 255],
         ];
@@ -44,16 +44,16 @@ class ItemAlias extends CActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'id' => Yii::t('app', 'ID'),
-            'category' => Yii::t('app', 'Category'),
-            'val' => Yii::t('app', 'Val'),
-            'label' => Yii::t('app', 'Label'),
-            'order_num' => Yii::t('app', 'Order Num'),
-            'status' => Yii::t('app', 'Status'),
+            'id' => Yii::t('common/model', 'id'),
+            'category' => Yii::t('common/model', 'category'),
+            'val' => Yii::t('common/model', 'val'),
+            'label' => Yii::t('common/model', 'label'),
+            'sort_order' => Yii::t('common/model', 'sort'),
+            'status' => Yii::t('common/model', 'status'),
         ];
     }
 
-    public static function getData($category, $order = 'order_num asc') {
+    public static function getData($category, $order = 'sort_order asc') {
         $data = static::find()->where(['category' => $category, 'status' => self::STATUS_ACTIVE])->orderBy($order)->select('val,label')->asArray()->all();
         if (!empty($data)) {
             $arr = [];

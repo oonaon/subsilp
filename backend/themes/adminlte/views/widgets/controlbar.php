@@ -3,35 +3,27 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Modal;
+use common\components\Button;
 
-
-/* @var $this yii\web\View */
-/* @var $model common\models\Company */
-/* @var $form yii\widgets\ActiveForm */
-$icons = [
-    'index' => '<i class="fa fa-list"></i>',
-    'add' => '<i class="fa fa-plus"></i>',
-    'update' => '<i class="fa fa-edit"></i>',
-    'save' => '<i class="fa fa-save"></i>',
-    'cancel' => '<i class="fa fa-ban"></i>',
-    'delete' => '<i class="fa fa-trash"></i>',
-    'search' => '<i class="fa fa-search"></i>',
-    'first' => '<i class="fa fa-angle-double-left"></i>',
-    'previous' => '<i class="fa fa-angle-left"></i>',
-    'next' => '<i class="fa fa-angle-right"></i>',
-    'last' => '<i class="fa fa-angle-double-right"></i>',
-];
-?>
-
-<?php
 if (is_array($buttons)) {
-    foreach ($buttons as $button) {
-        echo '<div class="btn-group">';
-        if (is_array($button)) {
-            foreach ($button as $btn) {
-
-                $options = [];
-                $options['class'] = 'btn btn-app';
+    $i=0;
+    foreach ($buttons as $position => $button) {
+        
+        if($i>0){
+            $style='style="padding-left:10px;"';
+        } else {
+            $style='';
+        }
+        if ($position=='right') {
+            echo '<div class="btn-group pull-right">';
+        } else {
+            echo '<div class="btn-group" '.$style.'>';
+            $i++;
+        }
+        foreach ($button as $btn) {
+            $options = [];
+                $options['class'] = 'btn btn-default btn-sm';
+                $options['style'] = 'margin-bottom:0px;';
 
                 if ($btn['disabled']) {
                     $options['class'] .= ' disabled hidden-xs';
@@ -44,7 +36,7 @@ if (is_array($buttons)) {
                 }
                 if ($btn['modal']) {
                     $options['data-toggle'] = 'modal';
-                    $options['data-target'] = '#modal-' . $btn['modal'];
+                    $options['data-target'] = '#' . $btn['modal'];
                 }
 
                 if ($btn['name'] == 'delete') {
@@ -55,11 +47,10 @@ if (is_array($buttons)) {
                 } else if ($btn['name'] == 'save') {
                     $options['id'] = 'btn-save';
                 }
+                echo Button::a($btn['name'], $btn['link'], $options,$btn['button']);
 
-                echo Html::a($icons[$btn['name']] . ' ' . Yii::t('backend/button', $btn['name']), $btn['link'], $options);
-            }
         }
-        echo '</div> ';
+        echo '</div>';
     }
 }
 
@@ -67,7 +58,6 @@ $this->registerJs('
         $("#btn-save").click(function () {
             $("#control-form").submit();
         });', \yii\web\View::POS_READY);
-
 
 // ***** START MODEL SEARCH *****
 Modal::begin([
@@ -86,5 +76,4 @@ $this->registerJs('$("#btn-model-search").click(function(){$("#form-search-model
 ActiveForm::end();
 Modal::end();
 // ***** END MODEL SEARCH *****
-
 ?>

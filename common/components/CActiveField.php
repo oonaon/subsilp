@@ -37,6 +37,28 @@ class CActiveField extends ActiveField {
         return $this->dropDownList($items, $options);
     }
 
+    public function filepanel($options = ['class' => 'col-xs-3']) {
+        $model = $this->model;
+        $attribute = $this->attribute;
+        $data = $model[$attribute];
+        $data = explode(',', $data);
+        $out = '';
+        if (!empty($data)) {
+            foreach ($data as $id) {
+                if (!empty($id)) {
+                    $f = File::findFile($id);
+                    $out .= '<div class="' . $options['class'] . ' ">';
+                    $out .= '<div class="thumbnail">';
+                    $out .= $f->icon('file_preview', ['style' => 'width:100%']);
+                    $out .= '<div class="caption text-sm" style="overflow:hidden; margin-right:9px; height: 30px;">' . $f->caption . '</div>';
+                    $out .= '</div>';
+                    $out .= '</div>';
+                }
+            }
+        }
+        return $out;
+    }
+
     public function file($options = []) {
         $model = $this->model;
         $attribute = $this->attribute;
@@ -45,33 +67,29 @@ class CActiveField extends ActiveField {
         if (!empty($data)) {
             $data = explode(',', $data);
             foreach ($data as $id) {
-                $f = File::findFile($id);
+                if (!empty($id)) {
+                    $f = File::findFile($id);
 
-                $content = '<div class="row">';
-
-                $content .= '<div class="col-xs-2">';
-                $content .= File::icon($f->url, $f->url, $f->caption, 'file_preview', ['class' => 'img-thumbnail float-left']);
-                $content .= '</div>';
-
-                $content .= '<div class="col-xs-10">';
-                $content .= Html::input('text', $attribute . '_file_caption[' . $id . ']', $f->caption, ['id' => $attribute . '_file_caption_id_' . $id, 'class' => 'form-control', 'disabled' => true]);
-
-                $content .= '<div class="btn-group pull-right">
-                                <a id="file_download_' . $id . '" href="' . $f->url . '" class="btn btn-default" download><i class="fa fa-download"></i></a>
+                    $content = '<div class="row">';
+                    $content .= '<div class="col-xs-2">';
+                    $content .= $f->icon('file_preview', ['class' => 'img-thumbnail float-left']);
+                    // $content .= File::icon($f->icon, $f->url, $f->caption, 'file_preview', ['class' => 'img-thumbnail float-left']);
+                    $content .= '</div>';
+                    $content .= '<div class="col-xs-10">';
+                    $content .= Html::input('text', $attribute . '_file_caption[' . $id . ']', $f->caption, ['id' => $attribute . '_file_caption_id_' . $id, 'class' => 'form-control', 'disabled' => true]);
+                    $content .= '<div class="btn-group pull-right">
+                                <a id="file_download_' . $id . '" href="' . $f->url . '" class="btn btn-default" download="' . $f->caption . '"><i class="fa fa-download"></i></a>
                                 <button id="file_edit_' . $id . '" type="button" class="btn btn-default" data-enabled="' . $id . '"><i class="fa fa-pencil"></i></button>  
                                 <button id="file_move_' . $id . '" type="button" class="btn btn-default handle" draggable="true" style="display: none;"><i class="fa fa-arrows"></i></button> 
                                 <button id="file_delete_' . $id . '" type="button" class="btn btn-default" data-widget="remove" style="display: none;"><i class="fa fa-trash"></i></button> 
                             </div>';
+                    //$content .= '<b>' . $f->filename . '</b>';
+                    $content .= '<span class="text-sm pull-left">' . strtoupper($f->extension) . ' / ' . File::format($f->size) . '</span> ';
+                    $content .= '</div>';
+                    $content .= '</div>';
 
-
-                //$content .= '<b>' . $f->filename . '</b>';
-                $content .= '<span class="text-sm pull-left">' . strtoupper($f->extension) . ' / ' . File::format($f->size) . '</span> ';
-
-                $content .= '</div>';
-
-                $content .= '</div>';
-
-                $items[$id] = ['content' => $content];
+                    $items[$id] = ['content' => $content];
+                }
             }
             $input_id = self::getID($options);
             $this->form->getView()->registerJs('
@@ -107,6 +125,10 @@ class CActiveField extends ActiveField {
             'sortableOptions' => [
                 'showHandle' => true,
                 'handleLabel' => false,
+                'options' => [
+                    'class' => 'pre-scrollable',
+                    'style' => 'max-height: 50vh;overflow-y: scroll;overflow-x: hidden;',
+                ],
             ],
         ]);
         $this->attribute = $this->attribute . "_upload[]";

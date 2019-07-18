@@ -45,6 +45,7 @@ class CompanyLocation extends CActiveRecord {
             [['address', 'memo', 'contact','map'], 'string'],
             [['postcode'], 'string', 'max' => 5],
             [['postcode'], 'number'],
+            [['latitude','longitude'], 'double'],
             [['map_upload'], 'file', 'maxFiles' => 10,'skipOnEmpty' => true, 'extensions' => ['jpg','png','pdf','zip','ai']],
         ];
     }
@@ -64,14 +65,15 @@ class CompanyLocation extends CActiveRecord {
             'province' => Yii::t('common/model', 'province'),
             'postcode' => Yii::t('common/model', 'postcode'),
             'map' => Yii::t('common/model', 'map'),
+            'latitude' => Yii::t('common/model', 'latitude'),
+            'longitude' => Yii::t('common/model', 'longitude'),
             'memo' => Yii::t('common/model', 'memo'),
             'item_default' => Yii::t('common/model', 'item_default'),
             'item_fix' => Yii::t('common/model', 'item_fix'),
         ];
     }
 
-    public function beforeSave($insert) {
-       // $this->map = implode(',', $this->map);
+    public function beforeSave($insert) {       
         $district = AreaDistricts::findOne($this->district);
         if (empty($district)) {
             $this->district = 0;
@@ -83,9 +85,13 @@ class CompanyLocation extends CActiveRecord {
         }
         return parent::beforeSave($insert);
     }
+    
+    public function beforeDelete() {
+        File::deleteFileAll($this->map);
+        return parent::beforeDelete();
+    }   
 
     public function afterFind() {
-       // $this->map = explode(',', $this->map);
         return parent::afterFind();
     }
 

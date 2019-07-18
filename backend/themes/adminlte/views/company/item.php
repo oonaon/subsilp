@@ -1,44 +1,47 @@
 <?php
-
 use yii\helpers\Url;
 use common\models\ItemAlias;
 use kartik\select2\Select2;
 use common\components\Area;
 use yii\widgets\ActiveForm;
 
+$controller=Yii::$app->controller->id;
+if ($controller == 'customer') {
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
+    $this->params['title'] = Yii::t('backend/menu', 'customer');
+} else if ($controller == 'supplier') {
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
+    $this->params['title'] = Yii::t('backend/menu', 'supplier');
+} else if ($controller == 'manufacturer') {
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
+    $this->params['title'] = Yii::t('backend/menu', 'injector');
+}
+if (!empty($model->id)) {
+    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
+}
+
+$action_id = Yii::$app->controller->action->id;
+if ($action_id == 'view') {
+    $button = ['update'];
+} else if ($action_id == 'update') {
+    $button = ['save', 'cancel'];
+} else if ($action_id == 'create') {
+    $button = ['save', 'cancel'];
+}
+
 $this->params['panel'] = [
     'id' => 'tab',
     'tabs' => $tabs,
     'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? true : false,
     'disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? false : true,
-    'tools' => false,
+    'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->name,
+    'button' => $button,
 ];
-$this->params['controlbar'] = [
-    'classname' => $company_type,
-];
-$panel = $this->params['panel'];
 
-if ($company_type == 'cus') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-    $this->title = Yii::t('backend/menu', 'customer');
-} else if ($company_type == 'sup') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
-    $this->title = Yii::t('backend/menu', 'supplier');
-} else if ($company_type == 'man') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-    $this->title = Yii::t('backend/menu', 'injector');
-}
-if (!empty($model->id)) {
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-    $this->title = $model->name;
-}
-
-$form = ActiveForm::begin([
-            'id' => 'control-form',
-        ]);
+$form = ActiveForm::begin(['id' => 'control-form']);
 ?>
 <?= $form->errorSummary($model); ?>
 
@@ -48,14 +51,14 @@ $form = ActiveForm::begin([
     $form->field($model, 'org', ['options' => ['class' => 'col-xs-12 col-md-4']])->widget(Select2::classname(), [
         'data' => ItemAlias::getData('org'),
         'options' => ['multiple' => true],
-        'disabled' => $panel['disabled'],
+        'disabled' => $this->params['panel']['disabled'],
     ]);
     ?>
     <?=
     $form->field($model, 'type', ['options' => ['class' => 'col-xs-12 col-md-4']])->widget(Select2::classname(), [
         'data' => ItemAlias::getData('company_type'),
         'options' => ['multiple' => true],
-        'disabled' => $panel['disabled'],
+        'disabled' => $this->params['panel']['disabled'],
     ]);
     ?>
 </div>

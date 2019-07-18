@@ -2,8 +2,8 @@
 use yii\widgets\Breadcrumbs;
 ?>
 <section class="content-header">
-    <?php if (isset($this->blocks['content-header'])) { ?>
-        <h1><?= $this->blocks['content-header'] ?></h1>
+    <?php if (isset($this->params['title'])) { ?>
+        <h1><?= $this->params['title'] ?></h1>
     <?php } else { ?>
         <h1>
             <?php
