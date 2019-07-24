@@ -13,21 +13,19 @@ use Yii;
  * @property string $name_en
  * @property int $amphure_id
  */
-class AreaDistricts extends \yii\db\ActiveRecord
-{
+class AreaDistricts extends \yii\db\ActiveRecord {
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'area_districts';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             [['id', 'postcode', 'name_th', 'name_en'], 'required'],
             [['postcode', 'amphure_id'], 'integer'],
@@ -40,8 +38,7 @@ class AreaDistricts extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
             'id' => Yii::t('common/model', 'ID'),
             'postcode' => Yii::t('common/model', 'Postcode'),
@@ -50,9 +47,14 @@ class AreaDistricts extends \yii\db\ActiveRecord
             'amphure_id' => Yii::t('common/model', 'Amphure ID'),
         ];
     }
-    
-    public function getAmphure(){
+
+    public function getAmphure() {
         return $this->hasOne(AreaAmphures::className(), ['id' => 'amphure_id']);
     }
-    
+
+    public function getSelectLabel() {
+        $out = $this->name_th . ' / ' . $this->amphure->name_th.' / '.$this->amphure->province->name_th;
+        return $out;
+    }
+
 }

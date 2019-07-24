@@ -10,7 +10,6 @@ $this->params['panel'] = [
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
-    'tools' => false,
     'title' => $model->code,
 ];
 $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];

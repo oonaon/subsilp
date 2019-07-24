@@ -8,13 +8,10 @@ use common\models\ItemAliasSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use common\components\ControlBar;
 use yii\data\ActiveDataProvider;
 use common\components\CActiveForm;
 
 class ItemaliasController extends Controller {
-
-    public $type = 'company_rank';
 
     /**
      * {@inheritdoc}
@@ -24,7 +21,7 @@ class ItemaliasController extends Controller {
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
-                    'delete' => ['POST'],
+                    'item_delete' => ['POST'],
                 ],
             ],
         ];
@@ -32,79 +29,45 @@ class ItemaliasController extends Controller {
 
     public function actionIndex() {
         $this->layout = 'main_sub';
+        $category = ItemAlias::find()->groupBy('category')->select('category')->asArray()->all();
         $searchModel = new ItemAliasSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams,$this->type);
+        $select_category = $id = Yii::$app->request->get('category', 'color');
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $select_category);
         return $this->render('/itemalias/index', [
                     'searchModel' => $searchModel,
                     'dataProvider' => $dataProvider,
-                 
+                    'category' => $category,
+                    'select_category' => $select_category,
         ]);
     }
 
-    public function actionView($id = '') {
-        $this->layout = 'main_tab';
-        $model = $this->findModel($id);
-        return $this->render('/company/item', [
-                    'model' => $model,
-                    'company_type' => $this->company_type,
-                    'tabs' => $this->tabs,
-        ]);
-    }
-
-    public function actionCreate($id = '') {
-        $this->layout = 'main_tab';
-        $model = new Company();
-        $model->org = Yii::$app->session['organize'];
-        $model->type = $this->company_type;
-        $model->status = 1;
+    public function actionItem_create($category) {
+        $model = new ItemAlias();
+        $model->category=$category;
+        $model->status=1;
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->updateLocation();
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            $model->code = ControlBar::getNextCode($this->company_type);
+            return $this->redirect(['index', 'category' => $model->category]);
         }
-        return $this->render('/company/item', [
+        return $this->renderAjax('/itemalias/item_form', [
                     'model' => $model,
-                    'company_type' => $this->company_type,
-                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionUpdate($id = '') {
-        $this->layout = 'main_tab';
+    public function actionItem_update($id) {
         $model = $this->findModel($id);
-        //print_r(Yii::$app->request->post());
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->updateLocation();
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['index', 'category' => $model->category]);
         }
-
-        return $this->render('/company/item', [
+        return $this->renderAjax('/itemalias/item_form', [
                     'model' => $model,
-                    'company_type' => $this->company_type,
-                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionDelete($id) {
-        CompanyContact::deleteEachAll(['company_id' => $id]);
-        CompanyLocation::deleteEachAll(['company_id' => $id]);
-        $this->findModel($id)->delete();
-        return $this->redirect(['index']);
-    }
-
-    // ***** OTHER *****
-
-    public function actionFind() {
-        $code = Yii::$app->request->post('find_code');
-        $code = strtoupper($code);
-        $model = Company::findOne(['code' => $code]);
-        if ($model) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            Yii::$app->session->setFlash('warning', Yii::t('backend/flash', 'not_found'));
-            return $this->redirect(Yii::$app->request->referrer);
-        }
+    public function actionItem_delete($id) {
+        $model = $this->findModel($id);
+        $cat=$model->category;
+        $model->delete();
+        return $this->redirect(['index', 'category' => $cat]);
     }
 
     protected function findModel($id) {

@@ -1,11 +1,13 @@
 <?php
+
 use yii\helpers\Url;
 use common\models\ItemAlias;
 use kartik\select2\Select2;
 use common\components\Area;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
-$controller=Yii::$app->controller->id;
+$controller = Yii::$app->controller->id;
 if ($controller == 'customer') {
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
@@ -37,10 +39,13 @@ $this->params['panel'] = [
     'tabs' => $tabs,
     'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? true : false,
     'disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? false : true,
-    'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->code.' - '.$model->getFullName(true),
-    'button' => $button,
+    'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->code . ' - ' . $model->getFullName(true),
+    'controlbar' => [
+        'template_add' => $button,
+    ],
 ];
 
+Pjax::begin();
 $form = ActiveForm::begin(['id' => 'control-form']);
 ?>
 <?= $form->errorSummary($model); ?>
@@ -74,9 +79,8 @@ $form = ActiveForm::begin(['id' => 'control-form']);
 </div>
 
 <div class="row">
-    <?= $form->field($model, 'postcode', ['options' => ['class' => 'col-xs-6 col-md-4']])->textInput(['maxlength' => true, 'id' => 'ddl-postcode']) ?>
-    <?= $form->field($model, 'district', ['options' => ['class' => 'col-xs-6 col-md-8']])->dropDownDependent('ddl-postcode', Area::getDistricts($model->postcode), ['area/postcode', 'val' => '{val}'], ['id' => 'ddl-district', 'prompt' => Yii::t('backend/general', 'select')]) ?>
-    <?= $form->field($model, 'address', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2]) ?>
+    <?= $form->field($model, 'district', ['options' => ['class' => 'col-xs-12 col-md-12']])->selectAjax(['postcode'], 5, ['disabled' => $this->params['panel']['disabled']])->label(Yii::t('common/model', 'postcode')) ?>
+    <?= $form->field($model, 'address', ['options' => ['class' => 'col-xs-12 col-md-12']])->textarea(['rows' => 2]) ?>
 </div>
 
 <div class="row">
@@ -106,4 +110,7 @@ $form = ActiveForm::begin(['id' => 'control-form']);
     <?= $form->field($model, 'memo', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 3]) ?>
 </div>
 
-<?php ActiveForm::end(); ?>
+<?php
+ActiveForm::end();
+Pjax::end();
+?>

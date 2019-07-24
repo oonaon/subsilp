@@ -60,11 +60,12 @@ class CompanyController extends Controller {
         $model->org = Yii::$app->session['organize'];
         $model->type = Company::getTypeFromController();
         $model->status = 1;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->updateLocation();
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            $model->code = ControlBar::getNextCode();
+        $model->generateNewCode();
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                $model->updateLocation();
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
         return $this->render('/company/item', [
                     'model' => $model,
@@ -75,10 +76,11 @@ class CompanyController extends Controller {
     public function actionUpdate($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        //print_r(Yii::$app->request->post());
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->updateLocation();
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                $model->updateLocation();
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('/company/item', [
@@ -146,16 +148,18 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionLocation_create($id) {
+    public function actionLocation_create($id = 3) {
         $model_location = new CompanyLocation();
         $model_location->item_default = 0;
         $model_location->item_fix = 0;
+        $model_location->latitude = 0;
+        $model_location->longitude = 0;
         $contact_default = CompanyContact::findOne(['company_id' => $id, 'item_default' => 1]);
         if (!empty($contact_default->id)) {
             $model_location->contact_id = $contact_default->id;
         }
         $model_location->company_id = $id;
-        if ($model_location->load(Yii::$app->request->post())) {
+        if ($model_location->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
             $model_location->map = File::uploadMultiple($id, $model_location, 'map');
             if ($model_location->save()) {
                 return $this->redirect(['location', 'id' => $id]);
@@ -170,7 +174,7 @@ class CompanyController extends Controller {
     public function actionLocation_update($id, $sid) {
         $model_location = CompanyLocation::findOne($sid);
         $old_map = $model_location->map;
-        if ($model_location->load(Yii::$app->request->post())) {
+        if ($model_location->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
             $model_location->map = File::uploadMultiple($id, $model_location, 'map', $old_map);
             if ($model_location->save()) {
                 return $this->redirect(['location', 'id' => $id]);

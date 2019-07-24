@@ -27,7 +27,9 @@ $this->params['panel'] = [
     'tabs_disabled' => in_array($action_id, ['create', 'update']) ? true : false,
     'disabled' => in_array($action_id, ['create', 'update']) ? false : true,
     'title' => empty($model->code) ? Yii::t('backend/tab', 'add_new') : $model->code,
-    'button' => $button,
+     'controlbar' => [
+        'template_add' => $button,
+    ],
 ];
 
 /*[

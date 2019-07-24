@@ -8,10 +8,80 @@ use yii\helpers\Url;
 use yii\widgets\ActiveField;
 use kartik\sortinput\SortableInput;
 use common\models\File;
+use common\components\Code;
+use kartik\select2\Select2;
+use yii\web\JsExpression;
 
 //use yii\widgets\ActiveForm;
 
 class CActiveField extends ActiveField {
+
+    public function selectAjax($url, $length = 3, $options = []) {
+        $ajax_name = $url[0];
+        $url[0] = 'ajax/' . $ajax_name;
+        $model = $this->model;
+        $attribute = $this->attribute;
+        $data = $model[$attribute];
+        if (!empty($data)) {
+            $default = \backend\controllers\AjaxController::getData($ajax_name, $data);
+        } else {
+            $default = null;
+        }
+        return $this->widget(Select2::classname(), [
+                    //'initValueText' => '',
+                    'data' => $default,
+                    'theme' => Select2::THEME_DEFAULT,
+                    'options' => $options,
+                    'disabled' => empty($options['disabled'])?false:$options['disabled'],
+                    'pluginOptions' => [
+                        'allowClear' => true,
+                        'minimumInputLength' => $length,
+                        'language' => [
+                            'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
+                        ],
+                        'ajax' => [
+                            'url' => URL::to($url),
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) { return {input:params.term}; }')
+                        ],
+                    //   'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                    //  'templateResult' => new JsExpression('function(address) { return address.name; }'),
+                    //  'templateSelection' => new JsExpression('function (address) { return address.name; }'),
+                    ],
+                    'pluginEvents' => [
+                        'select2:select' => 'function() {
+                            $("#' . $this->form->id . '").attr("data-pjax",true);
+                            $("#' . $this->form->id . '").submit();
+                        }',
+                    ],
+        ]);
+    }
+
+    public function code($options = []) {
+        $model = $this->model;
+        $attribute = $this->attribute;
+        $data = $model[$attribute];
+        $prefix = Code::prefixCode();
+
+        if (empty($data) || substr($data, 0, strlen($prefix)) == $prefix) {
+            $id = strtolower($model->formName() . '-' . $this->attribute);
+            $mask_id = $id . '-mask';
+            $text = str_replace($prefix, '', $data);
+            $this->form->getView()->registerJs('
+             $( "#' . $mask_id . '" ).change(function() {
+                 val=$.trim($(this).val());
+                 if(val!=""){val="' . $prefix . '"+val;}
+                 $( "#' . $id . '" ).val(val);
+             });', \yii\web\View::POS_READY);
+            $opt = $options;
+            $opt['class'] = 'form-control';
+            $opt['id'] = $mask_id;
+            $this->template = '{label}<div class="input-group"><span class="input-group-addon">' . $prefix . '</span>' . Html::textInput(null, $text, $opt) . '{input}</div>{hint}{error}';
+            return $this->hiddenInput($options);
+        } else {
+            return $this->textInput($options);
+        }
+    }
 
     public function dropDownDependent($dependent, $items, $url, $options = []) {
         $options['prompt'] = empty($options['prompt']) ? 'Select..' : $options['prompt'];

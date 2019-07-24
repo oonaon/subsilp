@@ -14,11 +14,14 @@ $this->params['panel'] = [
     'tabs_disabled' => false,
     'disabled' => false,
     'title' => $model->code,
-    'button' => [
-        'add_update' => [
-            'link' => ['images_update', 'id' => $model->id, '#' => 'modal-md'],
-            'modal' => 'modal-ajax',
+    'controlbar' => [
+        'button' => [
+            'add_update' => [
+                'link' => ['images_update', 'id' => $model->id, '#' => 'modal-md'],
+                'modal' => 'modal-ajax',
+            ],
         ],
+        'template_add' => ['add_update'],
     ],
 ];
 

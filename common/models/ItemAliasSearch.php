@@ -37,31 +37,28 @@ class ItemAliasSearch extends ItemAlias {
      *
      * @return ActiveDataProvider
      */
-    public function search($params,$type) {
+    public function search($params,$category) {
         $query = ItemAlias::find();
         $session = Yii::$app->session;
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['sort_order'=>SORT_ASC]],
         ]);
 
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
-        // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'category' => $type,
+            'category' => $category,
         ]);
 
         $query->andFilterWhere(['like', 'val', $this->val])
+                ->andFilterWhere(['like', 'category', $this->category])
                 ->andFilterWhere(['like', 'label', $this->label]);
 
         return $dataProvider;

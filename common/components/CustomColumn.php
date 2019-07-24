@@ -19,7 +19,9 @@ class CustomColumn {
     }
 
     public function org($val) {
-        //$alias = itemAlias::getData('org');
+        if(!is_array($val)){
+            $val= explode(',', $val);
+        }
         $out = '';
         foreach ($val as $item) {
             $letter = strtoupper(substr($item, 0, 1));

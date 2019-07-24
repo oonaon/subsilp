@@ -28,6 +28,11 @@ return [
             'primary_prefix' => '',
             'primary' => 'id',
         ],
+        'quotation' => [
+            'class' => 'common\models\Bill',
+            'primary_prefix' => 'QT',
+            'primary' => 'code',
+        ],
     ],
     'product_properties' => [
         'BOX' => ['od_w', 'od_l', 'od_h', 'id_w', 'id_l', 'id_h', 'weight', 'capacity'],

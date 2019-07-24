@@ -39,7 +39,7 @@ class CompanyLocation extends CActiveRecord {
      */
     public function rules() {
         return [
-            [['company_id', 'address', 'district', 'postcode'], 'required'],
+            [['company_id', 'address', 'district'], 'required'],
             [['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             [['company_id', 'contact_id', 'item_default', 'item_fix', 'district'], 'integer'],
             [['address', 'memo', 'contact','map'], 'string'],
@@ -79,9 +79,11 @@ class CompanyLocation extends CActiveRecord {
             $this->district = 0;
             $this->amphure = 0;
             $this->province = 0;
+            $this->postcode = '';
         } else {
             $this->amphure = $district->amphure_id;
             $this->province = $district->amphure->province_id;
+            $this->postcode = $district->postcode;
         }
         return parent::beforeSave($insert);
     }

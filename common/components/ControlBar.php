@@ -6,22 +6,25 @@ use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use common\components\Code;
 
 class ControlBar extends Widget {
 
-    public $pattern, $id, $class, $button;
+    public $pattern, $id, $class, $params;
+    public $controller_id, $action_id;
+    public $template = ['index', 'search', 'add', 'delete', 'first', 'previous', 'next', 'last'];
 
     public function init() {
         parent::init();
-
         $this->id = Yii::$app->request->get('id');
         $this->class = Yii::$app->params['class_model'][Yii::$app->controller->id];
-
-        $button_default = ['index', 'search', 'add', 'delete', 'first', 'previous', 'next', 'last'];
-        if (empty($this->button)) {
-            $this->button = $button_default;
-        } else {
-            $this->button = array_merge($this->button, $button_default);
+        $this->controller_id = Yii::$app->controller->id;
+        $this->action_id = Yii::$app->controller->action->id;
+        if (!empty($this->params['template'])) {
+            $this->template = $this->params['template'];
+        }
+        if (!empty($this->params['template_add'])) {
+            $this->template = array_merge($this->template, $this->params['template_add']);
         }
 
         $this->pattern = [
@@ -113,11 +116,7 @@ class ControlBar extends Widget {
     }
 
     public function run() {
-        $controller_id = Yii::$app->controller->id;
-        $action_id = Yii::$app->controller->action->id;
-
         $btn = [];
-
         foreach ($this->pattern as $key => $pattern) {
             $btn[$key] = $pattern;
             $btn[$key]['name'] = $key;
@@ -131,7 +130,7 @@ class ControlBar extends Widget {
             $btn['next']['disabled'] = true;
             $btn['last']['disabled'] = true;
 
-            if ($action_id == 'create') {
+            if ($this->action_id == 'create') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
@@ -145,10 +144,10 @@ class ControlBar extends Widget {
             $id_last = $this->getLastID();
             $id_previous = $this->getPreviousID();
             $id_next = $this->getNextID();
-            $btn['first']['link'] = [$action_id, 'id' => $id_first];
-            $btn['last']['link'] = [$action_id, 'id' => $id_last];
-            $btn['previous']['link'] = [$action_id, 'id' => $id_previous];
-            $btn['next']['link'] = [$action_id, 'id' => $id_next];
+            $btn['first']['link'] = [$this->action_id, 'id' => $id_first];
+            $btn['last']['link'] = [$this->action_id, 'id' => $id_last];
+            $btn['previous']['link'] = [$this->action_id, 'id' => $id_previous];
+            $btn['next']['link'] = [$this->action_id, 'id' => $id_next];
 
             if ($id_first == $this->id) {
                 $btn['first']['disabled'] = true;
@@ -174,7 +173,7 @@ class ControlBar extends Widget {
             $btn['update']['disabled'] = false;
             $btn['delete']['disabled'] = false;
 
-            if ($action_id == 'update') {
+            if ($this->action_id == 'update') {
                 $btn['add']['disabled'] = true;
                 $btn['save']['disabled'] = false;
                 $btn['cancel']['disabled'] = false;
@@ -191,59 +190,27 @@ class ControlBar extends Widget {
             }
         }
 
-        $buttons = [];
-        if (!empty($this->button)) {
-            foreach ($this->button as $key => $item) {
-                if (!is_array($item)) {
-                    $name = $item;
-                } else {
-                    $name = $key;
-                    foreach ($item as $prop => $val) {
-                        $btn[$name][$prop] = $val;
+        if (!empty($this->params['button'])) {
+            foreach ($this->params['button'] as $key => $items) {
+                if (is_array($items)) {
+                    foreach ($items as $prop => $item) {
+                        $btn[$key][$prop] = $item;
                     }
                 }
-
-                $pos = $btn[$name]['position'];
+            }
+        }
+        $buttons = [];
+        if (!empty($this->template)) {
+            foreach ($this->template as $name) {
+                $pos = empty($btn[$name]['position']) ? 'left' : $btn[$name]['position'];
                 $buttons[$pos][] = $btn[$name];
             }
         }
+
         return $this->render('@app/widgets/controlbar', [
                     'buttons' => $buttons,
-                    'prefix'=>self::getPrefixCode(),
+                    'prefix' => Code::prefixCode(),
         ]);
-    }
-
-    public static function getPrefixCode() {
-        $controller = Yii::$app->controller->id;
-        $class = Yii::$app->params['class_model'][$controller];
-        $org_prefix = strtoupper(substr(Yii::$app->session['organize'], 0, 1));
-        if ($controller != 'product') {
-            return strtoupper($org_prefix . $class['primary_prefix']);
-        }
-        return '';
-    }
-
-    public static function getNextCode() {
-        $prefix = self::getPrefixCode();
-        $controller = Yii::$app->controller->id;
-        $class = Yii::$app->params['class_model'][$controller];
-
-        if ($controller == 'customer' || $controller == 'supplier' || $controller == 'manufacturer') {
-            $type = substr($controller, 0, 3);
-            $model = $class['class']::find()->where('(' . $class['primary'] . ' like "' . $prefix . '%") and (type like :type) and (org like :org)', [':type' => '%' . $type . '%', ':org' => '%' . Yii::$app->session['organize'] . '%'])->orderBy(['abs(substring(' . $class['primary'] . ', 3))' => SORT_DESC])->one();
-        } else {
-            $model = $class['class']::find()->where('(' . $class['primary'] . ' like "' . $prefix . '%") and (org like :org)', [':org' => '%' . Yii::$app->session['organize'] . '%'])->orderBy(['abs(substring(' . $class['primary'] . ', 3))' => SORT_DESC])->one();
-        }
-        if (!empty($model)) {
-            $num = (int) str_replace($prefix, '', $model[$class['primary']]);
-            $num += 1;
-            return $prefix . $num;
-        } else if(!empty($prefix)){
-            return $prefix.'1';
-        } else {
-            return '';
-        }
-        
     }
 
     private function getCurrentCode() {

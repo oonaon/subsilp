@@ -12,11 +12,14 @@ $this->params['panel'] = [
     'tabs_disabled' => false,
     'disabled' => false,
     'title' => $model->code,
-    'button' => [
-        'add_update' => [
-            'link' => ['prices_create', 'id' => $model->id, '#' => 'modal-md'],
-            'modal' => 'modal-ajax',
+    'controlbar' => [
+        'button' => [
+            'add_update' => [
+                'link' => ['prices_create', 'id' => $model->id, '#' => 'modal-md'],
+                'modal' => 'modal-ajax',
+            ],
         ],
+        'template_add' => ['add_update'],
     ],
 ];
 $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];

@@ -6,8 +6,9 @@ use yii\helpers\ArrayHelper;
 use common\components\Area;
 use common\models\CompanyContact;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
-
+Pjax::begin();
 $form = ActiveForm::begin([
             'id' => 'form-modal',
             'options' => ['enctype' => 'multipart/form-data'],
@@ -21,11 +22,9 @@ if ($model_location->item_fix) {
 <?= $form->errorSummary($model_location); ?>
 
 <div class="row">
-
-    <?= $form->field($model_location, 'postcode', ['options' => ['class' => 'col-xs-6 col-md-4']])->textInput(['maxlength' => true, 'id' => 'ddl-postcode', 'disabled' => $disabled]) ?>
-
-    <?= $form->field($model_location, 'district', ['options' => ['class' => 'col-xs-6 col-md-8']])->dropDownDependent('ddl-postcode', Area::getDistricts($model_location->postcode), ['area/postcode', 'val' => '{val}'], ['id' => 'ddl-district', 'prompt' => Yii::t('backend/general', 'select'), 'disabled' => $disabled]) ?>
-
+    
+    <?= $form->field($model_location, 'district', ['options' => ['class' => 'col-xs-12 col-md-12']])->selectAjax(['postcode'], 5, ['disabled' => $disabled])->label(Yii::t('common/model', 'postcode')) ?>
+    
     <?= $form->field($model_location, 'address', ['options' => ['class' => 'col-xs-12']])->textarea(['rows' => 2, 'disabled' => $disabled]) ?>
 
     <?= $form->field($model_location, 'contact', ['options' => ['class' => 'col-xs-12 col-md-6']])->textInput() ?>
@@ -39,11 +38,12 @@ if ($model_location->item_fix) {
 
     <?= $form->field($model_location, 'latitude', ['options' => ['class' => 'col-xs-12 col-md-6']])->textInput() ?>
     <?= $form->field($model_location, 'longitude', ['options' => ['class' => 'col-xs-12 col-md-6']])->textInput() ?>
-    
+
     <?= $form->field($model_location, 'map', ['options' => ['class' => 'col-xs-12']])->file(['multiple' => true, 'accept' => 'image/*']) ?>
-    
+
 </div>
 
 <?php
 ActiveForm::end();
+Pjax::end();
 ?>

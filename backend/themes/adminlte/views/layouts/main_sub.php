@@ -1,89 +1,54 @@
 <?php
 
-use yii\helpers\Url;
 use common\components\ControlBar;
 use common\components\ModalAjax;
+use common\components\Button;
+use yii\helpers\Url;
+use yii\helpers\Html;
+
+$panel = $this->params['panel'];
+$panel['controlbar'] = (empty($panel['controlbar'])) ? '' : $panel['controlbar'];
 ?>
 <?php $this->beginPage() ?>
 <?= $this->render('begin') ?>
 
 <div class="page-layout">
-    
-        
-
-        
-
+    <div class="row">
+        <div class="col-sm-12 col-md-3">
             <div class="box box-solid">
-                <div class="box-header">
-                    <?= ControlBar::widget($this->params['controlbar']) ?>  
-                </div>
-            </div>
-
-            
-                    
-                    
-                    <div class="row">
-                    <div class="col-md-2">
-            <a href="compose.html" class="btn btn-primary btn-block margin-bottom">Compose</a>
-
-            <div class="box box-solid">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Folders</h3>
-
-                    <div class="box-tools">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
                 <div class="box-body no-padding">
                     <ul class="nav nav-pills nav-stacked">
-                        <li class="active"><a href="#"><i class="fa fa-inbox"></i> Inbox
-                                <span class="label label-primary pull-right">12</span></a></li>
-                        <li><a href="#"><i class="fa fa-envelope-o"></i> Sent</a></li>
-                        <li><a href="#"><i class="fa fa-file-text-o"></i> Drafts</a></li>
-                        <li><a href="#"><i class="fa fa-filter"></i> Junk <span class="label label-warning pull-right">65</span></a>
-                        </li>
-                        <li><a href="#"><i class="fa fa-trash-o"></i> Trash</a></li>
+                        <?php
+                        if (!empty($panel['category'])) {
+                            foreach ($panel['category'] as $category) {
+                                if (!empty($category['active'])) {
+                                    $active = 'class="active"';
+                                } else {
+                                    $active = '';
+                                }
+                                echo '<li ' . $active . '>';
+                                echo Html::a(Yii::t('common/itemalias', $category['label']), $category['link']);
+                                echo '</li>';
+                            }
+                        }
+                        ?>
                     </ul>
                 </div>
                 <!-- /.box-body -->
-            </div>
-            <!-- /. box -->
-            <div class="box box-solid">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Labels</h3>
-
-                    <div class="box-tools">
-                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="box-body no-padding">
-                    <ul class="nav nav-pills nav-stacked">
-                        <li><a href="#"><i class="fa fa-circle-o text-red"></i> Important</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o text-yellow"></i> Promotions</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o text-light-blue"></i> Social</a></li>
-                    </ul>
-                </div>
-                <!-- /.box-body -->
-            </div>
-            <!-- /.box -->
+            </div>   
         </div>
-                    <div class="col-md-10">
-                        <div class="box box-solid">
-                <div class="box-body">
-        <?= $content; ?>
-                        
-                    </div>
-                    
-                    </div>
-                    
-                    
-                    
-                </div>
-            
 
-        
+        <div class="col-sm-12 col-md-9">
+            <div class="box">
+                <div class="box-header">
+                    <?= ControlBar::widget(['params' => $panel['controlbar']]) ?> 
+                </div>
+                <div class="box-body">
+                    <?= $content; ?>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 

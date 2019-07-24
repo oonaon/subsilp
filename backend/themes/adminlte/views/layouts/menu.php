@@ -47,7 +47,7 @@ $action = Yii::$app->controller->action->id;
                             'url' => '#',
                             'items' => [
                                 ['label' => Yii::t('backend/menu', 'customer'), 'icon' => 'file-code-o', 'url' => ['/customer/index'], 'active' => ($controller == 'customer' ? true : false)],
-                                ['label' => 'sell 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
+                                ['label' => Yii::t('backend/menu', 'quotation'), 'icon' => 'file-code-o', 'url' => ['/quotation/index'], 'active' => ($controller == 'quotation' ? true : false)],
                                 [
                                     'label' => 'sell 3',
                                     'icon' => 'circle-o',
@@ -127,6 +127,7 @@ $action = Yii::$app->controller->action->id;
                             'url' => '#',
                             'items' => [
                                 ['label' => Yii::t('backend/menu', 'language'), 'icon' => 'language', 'url' => ['/language/index'], 'active' => ($controller == 'language' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'itemalias'), 'icon' => 'gear', 'url' => ['/itemalias/index'], 'active' => ($controller == 'itemalias' ? true : false)],
                                 ['label' => Yii::t('backend/menu', 'gii'), 'icon' => 'file-code-o', 'url' => ['/gii'],],
                                 ['label' => Yii::t('backend/menu', 'debug'), 'icon' => 'bug', 'url' => ['/debug'],],
                             ],

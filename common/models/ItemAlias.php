@@ -32,7 +32,8 @@ class ItemAlias extends CActiveRecord {
      */
     public function rules() {
         return [
-            [['category', 'val', 'label', 'sort_order', 'status'], 'required'],
+            [['category', 'label'], 'required'],
+       //     ['val', 'unique', 'targetAttribute' => ['category','val']],
             [['sort_order'], 'number'],
             [['status'], 'integer'],
             [['category', 'val', 'label'], 'string', 'max' => 255],

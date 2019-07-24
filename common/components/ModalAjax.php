@@ -21,6 +21,7 @@ class ModalAjax extends Widget {
         Modal::end();
         
         $this->getView()->registerJs('$("#btn-modal-submit").click(function(){ 
+                    $("#form-modal").removeAttr("data-pjax");
                     $("#form-modal").submit();
                 });', \yii\web\View::POS_READY);
         

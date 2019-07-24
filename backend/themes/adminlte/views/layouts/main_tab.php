@@ -2,11 +2,10 @@
 
 use yii\helpers\Url;
 use common\components\ControlBar;
-use common\components\ModalAjax;
 use common\components\Button;
 
 $panel = $this->params['panel'];
-$panel['button']=(empty($panel['button']))?'':$panel['button'];
+$panel['controlbar'] = (empty($panel['controlbar'])) ? '' : $panel['controlbar'];
 ?>
 <?php $this->beginPage() ?>
 <?= $this->render('begin') ?>
@@ -29,7 +28,7 @@ $panel['button']=(empty($panel['button']))?'':$panel['button'];
                     ?>
                     <span class="navbar-brand"><?= $panel['title'] ?></span>   
                 </div>
-                
+
                 <div class="collapse navbar-collapse" id="panel_nav">
                     <ul class="nav navbar-nav navbar-right">
                         <?php
@@ -57,10 +56,10 @@ $panel['button']=(empty($panel['button']))?'':$panel['button'];
                         ?>
                     </ul>
                 </div>
-                
+
             </nav>
 
-            <?= ControlBar::widget(['button'=>$panel['button']]) ?>  
+            <?= ControlBar::widget(['params' => $panel['controlbar']]) ?> 
 
             <!--
             <div class="pull-right">
@@ -80,6 +79,5 @@ $panel['button']=(empty($panel['button']))?'':$panel['button'];
     </div>
 
 </div>
-<?= ModalAjax::widget(['id' => 'modal-ajax']) ?>
 <?= $this->render('end') ?>
 <?php $this->endPage() ?>

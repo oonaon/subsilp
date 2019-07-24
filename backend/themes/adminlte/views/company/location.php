@@ -1,9 +1,10 @@
 <?php
+
 use yii\grid\GridView;
 use yii\helpers\Html;
 use common\components\CustomColumn;
 
-$controller=Yii::$app->controller->id;
+$controller = Yii::$app->controller->id;
 if ($controller == 'customer') {
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
     $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
@@ -27,11 +28,14 @@ $this->params['panel'] = [
     'tabs_disabled' => false,
     'disabled' => false,
     'title' => $model->name,
-    'button' => [
-        'add_update' => [
-            'link' => ['location_create', 'id' => $model->id, '#' => 'modal-md'],
-            'modal' => 'modal-ajax',
+    'controlbar' => [
+        'button' => [
+            'add_update' => [
+                'link' => ['location_create', 'id' => $model->id, '#' => 'modal-md'],
+                'modal' => 'modal-ajax',
+            ],
         ],
+        'template_add' => ['add_update'],
     ],
 ];
 
@@ -79,6 +83,3 @@ echo GridView::widget([
     ],
 ]);
 ?>
-
-
-

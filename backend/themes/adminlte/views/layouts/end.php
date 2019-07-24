@@ -1,3 +1,6 @@
+<?php
+use common\components\ModalAjax;
+?>
                 <!------- END CONTENT ------->
                 </section>
             </div>
@@ -8,3 +11,4 @@
         <?php $this->endBody() ?>
     </body>
 </html>
+<?= ModalAjax::widget(['id' => 'modal-ajax']) ?>

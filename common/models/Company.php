@@ -8,6 +8,7 @@ use common\models\CompanyLocation;
 use common\models\Area;
 use common\models\ItemAlias;
 use common\components\CActiveRecord;
+use common\components\Code;
 
 /**
  * This is the model class for table "company".
@@ -141,9 +142,11 @@ class Company extends CActiveRecord {
             $this->district = 0;
             $this->amphure = 0;
             $this->province = 0;
+            $this->postcode = '';
         } else {
             $this->amphure = $district->amphure_id;
             $this->province = $district->amphure->province_id;
+            $this->postcode = $district->postcode;
         }
         return parent::beforeSave($insert);
     }
@@ -203,6 +206,12 @@ class Company extends CActiveRecord {
             $type = $controller;
         }
         return $type;
+    }
+
+    public function generateNewCode() {        
+        $type=self::getTypeFromController();
+        $last = Company::find()->where('(code like :prefix) and (org like :org) and (type like :type)', [':type' => '%' . $type . '%', ':org' => '%' . Yii::$app->session['organize'] . '%', ':prefix' => Code::frontCompany() . '%'])->orderBy(['abs(substring(code, 3))' => SORT_DESC])->select('code')->asArray()->one();        
+        $this->code = Code::generateCompanyCode($last['code']);
     }
 
 }
