@@ -1,33 +1,31 @@
 <?php
 
 use yii\grid\GridView;
-use yii\helpers\Html;
-use common\components\CustomColumn;
-use common\components\Button;
-use common\models\Unit;
 use common\models\ItemAlias;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
+
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->code);
 
 $this->params['panel'] = [
+    'id' => 'tab',
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
     'title' => $model->code,
     'controlbar' => [
         'button' => [
-            'add_update' => [
-                'link' => ['prices_create', 'id' => $model->id, '#' => 'modal-md'],
-                'modal' => 'modal-ajax',
+            'manage' => [
+                'link' => ['prices-update', 'id' => $model->id],
             ],
         ],
-        'template_add' => ['add_update'],
+        'template_add' => ['manage'],
     ],
 ];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->code, 'url' => ['item', 'id' => $model->id]];
-$this->params['title'] = Yii::t('backend/menu', 'product');
 
 
+Pjax::begin();
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     //'filterModel' => $searchModel,
@@ -44,17 +42,17 @@ echo GridView::widget([
         'price',
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{modal} {delete}',
+            'template' => '{update} {delete}',
             'urlCreator' => function ($button, $item, $key, $index) use ($model) {
-                if ($button === 'modal') {
-                    $url = ['prices_update', 'id' => $model->id, 'sid' => $item->id, '#' => 'modal-md'];
+                if ($button === 'update') {
+                    $url = ['prices-update', 'id' => $model->id, 'sid' => $item->id];
                     return $url;
                 }
                 if ($button === 'delete') {
                     if ($item->item_fix) {
                         return false;
                     } else {
-                        $url = ['prices_delete', 'id' => $model->id, 'sid' => $item->id];
+                        $url = ['prices-delete', 'id' => $model->id, 'sid' => $item->id];
                         return $url;
                     }
                 }
@@ -62,6 +60,7 @@ echo GridView::widget([
         ],
     ],
 ]);
+Pjax::end();
 ?>
 
 

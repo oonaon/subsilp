@@ -36,6 +36,7 @@ return [
     ],
     'product_properties' => [
         'BOX' => ['od_w', 'od_l', 'od_h', 'id_w', 'id_l', 'id_h', 'weight', 'capacity'],
+        'SPR' => ['od_w', 'od_l', 'od_h', 'weight', 'capacity'],
         'BIN' => ['od_w', 'od_l', 'od_h', 'weight', 'capacity'],
         'TAN' => ['od_w', 'od_l', 'od_h', 'diameter', 'weight', 'capacity'],
     ],

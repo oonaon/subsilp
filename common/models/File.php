@@ -201,14 +201,16 @@ class File extends CActiveRecord {
         }
         $del[] = self::getDir(self::ORIGINAL_FOLDER) . self::getCategory() . '/' . $id;
         foreach ($del as $path) {
-            $d = dir($path);
-            while (false !== ($entry = $d->read())) {
-                if ($entry != '.' && $entry != '..') {
-                    rmdir($path . '/' . $entry);
+            if (is_dir($path)) {
+                $d = dir($path);
+                while (false !== ($entry = $d->read())) {
+                    if ($entry != '.' && $entry != '..' && is_dir($path . '/' . $entry)) {
+                        rmdir($path . '/' . $entry);
+                    }
                 }
+                $d->close();
+                rmdir($path);
             }
-            $d->close();
-            rmdir($path);
         }
     }
 

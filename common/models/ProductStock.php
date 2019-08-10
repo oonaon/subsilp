@@ -4,15 +4,6 @@ namespace common\models;
 
 use Yii;
 
-/**
- * This is the model class for table "product_stock".
- *
- * @property int $id
- * @property int $product_id
- * @property string $color
- * @property string $name
- * @property int $quantity
- */
 class ProductStock extends \common\components\CActiveRecord
 {
     /**
@@ -29,9 +20,12 @@ class ProductStock extends \common\components\CActiveRecord
     public function rules()
     {
         return [
-            [['product_id', 'color', 'name'], 'required'],
+            [['product_id', 'sub', 'name'], 'required'],
+            ['name', 'unique', 'targetAttribute' => ['product_id','sub','name']],
             [['product_id', 'quantity'], 'integer'],
-            [['color', 'name'], 'string', 'max' => 20],
+            [['sub', 'name'], 'string', 'max' => 20],
+            [['caption'], 'string', 'max' => 255],
+            [['status'], 'string', 'max' => 5],
         ];
     }
 
@@ -43,9 +37,11 @@ class ProductStock extends \common\components\CActiveRecord
         return [
             'id' => Yii::t('common/model', 'id'),
             'product_id' => Yii::t('common/model', 'product'),
-            'color' => Yii::t('common/model', 'color'),
+            'sub' => Yii::t('common/model', 'color'),
             'name' => Yii::t('common/model', 'name'),
             'quantity' => Yii::t('common/model', 'quantity'),
+            'caption' => Yii::t('common/model', 'caption'),
+            'status' => Yii::t('common/model', 'status'),
         ];
     }
 }

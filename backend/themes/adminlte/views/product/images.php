@@ -1,13 +1,10 @@
 <?php
-
-use yii\helpers\Url;
-use common\models\ItemAlias;
-use kartik\select2\Select2;
-use common\components\Area;
-use common\components\Button;
 use yii\widgets\ActiveForm;
-use yii\helpers\Html;
-use common\models\File;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
+
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->code);
 
 $this->params['panel'] = [
     'tabs' => $tabs,
@@ -16,21 +13,15 @@ $this->params['panel'] = [
     'title' => $model->code,
     'controlbar' => [
         'button' => [
-            'add_update' => [
-                'link' => ['images_update', 'id' => $model->id, '#' => 'modal-md'],
-                'modal' => 'modal-ajax',
+            'manage' => [
+                'link' => ['images-update', 'id' => $model->id],
             ],
         ],
-        'template_add' => ['add_update'],
+        'template_add' => ['manage'],
     ],
 ];
 
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->code, 'url' => ['view', 'id' => $model->id]];
-$this->params['title'] = Yii::t('backend/menu', 'product');
-
-
+Pjax::begin();
 $form = ActiveForm::begin();
 ?>
 
@@ -40,4 +31,5 @@ $form = ActiveForm::begin();
 
 <?php
 ActiveForm::end();
+Pjax::end();
 ?>

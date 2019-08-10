@@ -83,7 +83,7 @@ class Product extends \common\components\CActiveRecord {
 
     public function beforeDelete() {
         File::deleteFileAll($this->images);
-        File::deleteDir($id);
+        File::deleteDir($this->id);
         return parent::beforeDelete();
     }
 
@@ -99,7 +99,19 @@ class Product extends \common\components\CActiveRecord {
         return $this->hasMany(ProductStock::className(), ['product_id' => 'id']);
     }
 
-    public function properties($name) {
+    public function getProductPrice($company = '', $quantity = 1) {
+        $price = '';
+        foreach ($this->prices as $item) {
+            if ($quantity >= $item->quantity) {
+                if (empty($price) || $price > $item->price) {
+                    $price = $item->price;
+                }
+            }
+        }
+        return $price;
+    }
+
+    public function prop($name) {
         $prop = ProductProperties::find()->where(['product_id' => $this->id, 'name' => $name])->one();
         if ($prop !== null) {
             return $prop;
@@ -109,7 +121,7 @@ class Product extends \common\components\CActiveRecord {
     }
 
     public function getPropertiesVal($name) {
-        $prop = self::properties($name);
+        $prop = self::prop($name);
         if ($prop !== null) {
             return $prop->val;
         } else {
@@ -118,7 +130,7 @@ class Product extends \common\components\CActiveRecord {
     }
 
     public function setPropertiesVal($name, $val) {
-        $prop = self::properties($name);
+        $prop = self::prop($name);
         if ($prop !== null) {
             $prop->val = $val;
             if ($prop->save()) {
@@ -140,7 +152,7 @@ class Product extends \common\components\CActiveRecord {
         foreach ($config as $key => $props) {
             if ($prefix == $key) {
                 foreach ($props as $name) {
-                    if (self::properties($name) === null) {
+                    if (self::prop($name) === null) {
                         $prop = new ProductProperties();
                         $prop->product_id = $this->id;
                         $prop->name = $name;
@@ -174,6 +186,56 @@ class Product extends \common\components\CActiveRecord {
             return true;
         } else {
             return false;
+        }
+    }
+    
+    public function getSubDefault() {
+        return 'B';
+    }
+
+    public function getSubProduct() {
+        $prefix = self::prefixName();
+        $sub = [];
+        if ($prefix == 'BOX') {
+            $items = ProductStock::find()->where(['product_id' => $this->id])->groupBy('sub')->all();
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    $sub[$item->sub] = $item->sub . ' - ' . Yii::t('common/itemalias', 'color_' . strtolower($item->sub)) . '';
+                }
+            }
+            //$sub = ItemAlias::getData('color');
+        }
+        return $sub;
+    }
+
+    public function getStockProduct($sub = '') {
+        self::initStock($sub,'ori');
+        $prefix = self::prefixName();
+        $stock = [];      
+        if ($prefix == 'BOX') {
+            $items = ProductStock::find()->where(['product_id' => $this->id, 'sub' => $sub, 'status' => '1'])->all();
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    $stock[$item->id] = strtoupper($item->name) . ' = ' . $item->quantity . (!empty($item->caption) ? ' (' . $item->caption . ')' : '');
+                }
+            }
+        }
+
+       // print_r($stock);
+
+        return $stock;
+    }
+
+    public function initStock($sub = '',$name='ori') {
+        $items = ProductStock::findOne(['product_id' => $this->id, 'sub' => $sub, 'name' => $name]);
+        if (empty($items)) {
+            $stock = new ProductStock();
+            $stock->product_id=$this->id;
+            $stock->sub=$sub;
+            $stock->name=$name;
+            $stock->status='1';
+            $stock->quantity=0;
+            $stock->save();
         }
     }
 

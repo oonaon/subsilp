@@ -10,31 +10,54 @@ use kartik\sortinput\SortableInput;
 use common\models\File;
 use common\components\Code;
 use kartik\select2\Select2;
+use kartik\widgets\DatePicker;
 use yii\web\JsExpression;
 
 //use yii\widgets\ActiveForm;
 
 class CActiveField extends ActiveField {
 
+    public function date($options = []) {
+        return $this->widget(DatePicker::classname(), [
+                    //'type' => DatePicker::TYPE_COMPONENT_APPEND,
+                    'removeButton' => false,
+                    'options' => $options,
+                    'disabled' => empty($options['disabled']) ? false : $options['disabled'],
+                    'pluginOptions' => [
+                        'autoclose' => true,
+                        'format' => 'yyyy-mm-dd',
+                    ],
+        ]);
+    }
+
+    public function multiple($data, $options = []) {
+        $options['multiple'] = true;
+        return $this->widget(Select2::classname(), [
+                    'data' => $data,
+                    'theme' => Select2::THEME_DEFAULT,
+                    'options' => $options,
+                    'disabled' => empty($options['disabled']) ? false : $options['disabled'],
+        ]);
+    }
+
     public function selectAjax($url, $length = 3, $options = []) {
         $ajax_name = $url[0];
         $url[0] = 'ajax/' . $ajax_name;
-        $model = $this->model;
-        $attribute = $this->attribute;
-        $data = $model[$attribute];
+        $data = Html::getAttributeValue($this->model,$this->attribute);
         if (!empty($data)) {
             $default = \backend\controllers\AjaxController::getData($ajax_name, $data);
         } else {
-            $default = null;
+            $default = [0 => ''];
         }
+
         return $this->widget(Select2::classname(), [
                     //'initValueText' => '',
                     'data' => $default,
                     'theme' => Select2::THEME_DEFAULT,
                     'options' => $options,
-                    'disabled' => empty($options['disabled'])?false:$options['disabled'],
+                    'disabled' => empty($options['disabled']) ? false : $options['disabled'],
                     'pluginOptions' => [
-                        'allowClear' => true,
+                        'allowClear' => false,
                         'minimumInputLength' => $length,
                         'language' => [
                             'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
@@ -44,27 +67,24 @@ class CActiveField extends ActiveField {
                             'dataType' => 'json',
                             'data' => new JsExpression('function(params) { return {input:params.term}; }')
                         ],
-                    //   'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
-                    //  'templateResult' => new JsExpression('function(address) { return address.name; }'),
-                    //  'templateSelection' => new JsExpression('function (address) { return address.name; }'),
+                    //  'containerCssClass' => '',
+                    //  'dropdownCssClass' => '',
                     ],
-                    'pluginEvents' => [
-                        'select2:select' => 'function() {
-                            $("#' . $this->form->id . '").attr("data-pjax",true);
-                            $("#' . $this->form->id . '").submit();
-                        }',
-                    ],
+                    'pluginEvents' => ['select2:select' => 'submitPjax'],
         ]);
+    }
+    
+    public function textInputLabel($label='',$options=[]) {
+        $this->template = '{label}<div class="input-group"><span class="input-group-addon">' . $label . '</span>{input}</div>{hint}{error}';
+        return $this->textInput($options);
     }
 
     public function code($options = []) {
-        $model = $this->model;
-        $attribute = $this->attribute;
-        $data = $model[$attribute];
+        $data = Html::getAttributeValue($this->model,$this->attribute);
         $prefix = Code::prefixCode();
 
         if (empty($data) || substr($data, 0, strlen($prefix)) == $prefix) {
-            $id = strtolower($model->formName() . '-' . $this->attribute);
+            $id = strtolower($this->model->formName() . '-' . $this->attribute);
             $mask_id = $id . '-mask';
             $text = str_replace($prefix, '', $data);
             $this->form->getView()->registerJs('
@@ -108,9 +128,7 @@ class CActiveField extends ActiveField {
     }
 
     public function filepanel($options = ['class' => 'col-xs-3']) {
-        $model = $this->model;
-        $attribute = $this->attribute;
-        $data = $model[$attribute];
+        $data = Html::getAttributeValue($this->model,$this->attribute);
         $data = explode(',', $data);
         $out = '';
         if (!empty($data)) {
@@ -130,9 +148,7 @@ class CActiveField extends ActiveField {
     }
 
     public function file($options = []) {
-        $model = $this->model;
-        $attribute = $this->attribute;
-        $data = $model[$attribute];
+        $data = Html::getAttributeValue($this->model,$this->attribute);
         $items = [];
         if (!empty($data)) {
             $data = explode(',', $data);

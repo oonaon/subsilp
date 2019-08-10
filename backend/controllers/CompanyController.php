@@ -9,7 +9,6 @@ use common\models\CompanyContact;
 use common\models\CompanyLocation;
 use common\models\File;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\ControlBar;
 use yii\data\ActiveDataProvider;
@@ -28,8 +27,10 @@ class CompanyController extends Controller {
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
-                    'contact_delete' => ['POST'],
-                    'contact_default' => ['POST'],
+                    'contact-delete' => ['POST'],
+                    'contact-default' => ['POST'],
+                    'location-delete' => ['POST'],
+                    'location-default' => ['POST'],
                 ],
             ],
         ];
@@ -45,29 +46,10 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionView($id = '') {
+    public function actionView($id) {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        return $this->render('/company/item', [
-                    'model' => $model,
-                    'tabs' => $this->tabs,
-        ]);
-    }
-
-    public function actionCreate($id = '') {
-        $this->layout = 'main_tab';
-        $model = new Company();
-        $model->org = Yii::$app->session['organize'];
-        $model->type = Company::getTypeFromController();
-        $model->status = 1;
-        $model->generateNewCode();
-        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
-            if ($model->save()) {
-                $model->updateLocation();
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        }
-        return $this->render('/company/item', [
+        return $this->render('/company/update', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
@@ -76,14 +58,19 @@ class CompanyController extends Controller {
     public function actionUpdate($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
+        if ($model->isNewRecord) {
+            $model->org = Yii::$app->session['organize'];
+            $model->type = Company::getTypeFromController();
+            $model->status = 1;
+            $model->generateNewCode();
+        }
         if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
             if ($model->save()) {
                 $model->updateLocation();
                 return $this->redirect(['view', 'id' => $model->id]);
             }
         }
-
-        return $this->render('/company/item', [
+        return $this->render('/company/update', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
@@ -92,7 +79,8 @@ class CompanyController extends Controller {
     public function actionDelete($id) {
         CompanyContact::deleteEachAll(['company_id' => $id]);
         CompanyLocation::deleteEachAll(['company_id' => $id]);
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $model->delete();
         return $this->redirect(['index']);
     }
 
@@ -101,33 +89,25 @@ class CompanyController extends Controller {
     public function actionFiles($id) {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-
-        $old_files = $model->files;
-        if ($model->load(Yii::$app->request->post())) {
-            $model->files = File::uploadMultiple($id, $model, 'files', $old_files);
-            if ($model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        }
-
         return $this->render('/company/files', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionFiles_update($id) {
+    public function actionFilesUpdate($id) {
+        $this->layout = 'main_tab';
         $model = $this->findModel($id);
         $old_files = $model->files;
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
             $model->files = File::uploadMultiple($id, $model, 'files', $old_files);
             if ($model->save()) {
                 return $this->redirect(['files', 'id' => $model->id]);
             }
         }
-
-        return $this->renderAjax('/company/files_form', [
+        return $this->render('/company/files_update', [
                     'model' => $model,
+                    'tabs' => $this->tabs,
         ]);
     }
 
@@ -140,6 +120,7 @@ class CompanyController extends Controller {
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => false,
+            //'sort' => ['defaultOrder' => ['id' => SORT_ASC]],
         ]);
         return $this->render('/company/location', [
                     'model' => $model,
@@ -148,56 +129,51 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionLocation_create($id = 3) {
-        $model_location = new CompanyLocation();
-        $model_location->item_default = 0;
-        $model_location->item_fix = 0;
-        $model_location->latitude = 0;
-        $model_location->longitude = 0;
-        $contact_default = CompanyContact::findOne(['company_id' => $id, 'item_default' => 1]);
-        if (!empty($contact_default->id)) {
-            $model_location->contact_id = $contact_default->id;
+    public function actionLocationUpdate($id, $sid = '') {
+        $this->layout = 'main_tab';
+        $model = $this->findLocation($sid);
+        if ($model->isNewRecord) {
+            $model->company_id = $id;
+            $model->item_default = 0;
+            $model->item_fix = 0;
+            $model->latitude = 0;
+            $model->longitude = 0;
+            
+            $contact = CompanyContact::findOne(['company_id' => $id, 'item_default' => 1]);
+            if (!empty($contact->id)) {
+                $model->contact_id = $contact->id;
+            }
+            
+            $item = CompanyLocation::findOne(['company_id' => $id, 'item_default' => 1]);
+            if (empty($item)) {
+                $model->item_default = 1;
+            }
         }
-        $model_location->company_id = $id;
-        if ($model_location->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
-            $model_location->map = File::uploadMultiple($id, $model_location, 'map');
-            if ($model_location->save()) {
+        $old_map = $model->map;
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            $model->map = File::uploadMultiple($id, $model, 'map', $old_map);
+            if ($model->save()) {
                 return $this->redirect(['location', 'id' => $id]);
             }
         }
-        return $this->renderAjax('/company/location_form', [
-                    'model_location' => $model_location,
-                    'id' => $id,
+        return $this->render('/company/location_update', [
+                    'model' => $model,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionLocation_update($id, $sid) {
-        $model_location = CompanyLocation::findOne($sid);
-        $old_map = $model_location->map;
-        if ($model_location->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
-            $model_location->map = File::uploadMultiple($id, $model_location, 'map', $old_map);
-            if ($model_location->save()) {
-                return $this->redirect(['location', 'id' => $id]);
-            }
-        }
-        return $this->renderAjax('/company/location_form', [
-                    'model_location' => $model_location,
-                    'id' => $id,
-        ]);
-    }
-
-    public function actionLocation_default($id, $sid) {
+    public function actionLocationDefault($id, $sid) {
         CompanyLocation::updateAll(['item_default' => 0], ['company_id' => $id]);
-        $model_location = CompanyLocation::findOne($sid);
-        $model_location->item_default = 1;
-        $model_location->save();
+        $model = CompanyLocation::findOne($sid);
+        $model->item_default = 1;
+        $model->save();
         return $this->redirect(['location', 'id' => $id]);
     }
 
-    public function actionLocation_delete($id, $sid) {
-        $model_location = CompanyLocation::findOne($sid);
-        if (!$model_location->item_fix) {
-            $model_location->delete();
+    public function actionLocationDelete($id, $sid) {
+        $model = CompanyLocation::findOne($sid);
+        if (!$model->item_fix) {
+            $model->delete();
         }
         return $this->redirect(['location', 'id' => $id]);
     }
@@ -219,40 +195,37 @@ class CompanyController extends Controller {
         ]);
     }
 
-    public function actionContact_create($id) {
-        $model_contact = new CompanyContact();
-        $num = CompanyContact::find()->where(['company_id' => $id])->count();
-        if (empty($num)) {
-            $model_contact->item_default = 1;
+    public function actionContactUpdate($id, $sid = '') {
+        $this->layout = 'main_tab';
+        $model = $this->findContact($sid);
+        if ($model->isNewRecord) {
+            $model->company_id = $id;
+            $model->item_default = 0;
+            $item = CompanyContact::findOne(['company_id' => $id, 'item_default' => 1]);
+            if (empty($item)) {
+                $model->item_default = 1;
+            }
         }
-        $model_contact->company_id = $id;
-        if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
-            return $this->redirect(['contact', 'id' => $id]);
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                return $this->redirect(['contact', 'id' => $id]);
+            }
         }
-        return $this->renderAjax('/company/contact_form', [
-                    'model_contact' => $model_contact,
+        return $this->render('/company/contact_update', [
+                    'model' => $model,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionContact_update($id, $sid) {
-        $model_contact = CompanyContact::findOne($sid);
-        if ($model_contact->load(Yii::$app->request->post()) && $model_contact->save()) {
-            return $this->redirect(['contact', 'id' => $id]);
-        }
-        return $this->renderAjax('/company/contact_form', [
-                    'model_contact' => $model_contact,
-        ]);
-    }
-
-    public function actionContact_default($id, $sid) {
+    public function actionContactDefault($id, $sid) {
         CompanyContact::updateAll(['item_default' => 0], ['company_id' => $id]);
-        $model_contact = CompanyContact::findOne($sid);
-        $model_contact->item_default = 1;
-        $model_contact->save();
+        $model = CompanyContact::findOne($sid);
+        $model->item_default = 1;
+        $model->save();
         return $this->redirect(['contact', 'id' => $id]);
     }
 
-    public function actionContact_delete($id, $sid) {
+    public function actionContactDelete($id, $sid) {
         CompanyContact::findOne($sid)->delete();
         return $this->redirect(['contact', 'id' => $id]);
     }
@@ -272,10 +245,30 @@ class CompanyController extends Controller {
     }
 
     protected function findModel($id) {
-        if (($model = Company::findOne($id)) !== null) {
+        if(empty($id)){
+            return new Company;
+        } else if (($model = Company::findOne($id)) !== null) {
             return $model;
         }
-        throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    protected function findContact($id) {
+        if(empty($id)){
+            return new CompanyContact;
+        } else if (($model = CompanyContact::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    protected function findLocation($id) {
+        if(empty($id)){
+            return new CompanyLocation;
+        } else if (($model = CompanyLocation::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
 }

@@ -57,13 +57,13 @@ return [
     ],
     'container' => [
         'definitions' => [
-            yii\widgets\ActiveForm::class => [
-                'fieldClass' => 'common\components\CActiveField',
-            ],
+      //      yii\widgets\ActiveForm::class => [
+      //          'fieldClass' => 'common\components\CActiveField',
+      //      ],
             yii\grid\GridView::class => [
                 'layout' => "{items}\n{summary} {pager}",
                 'summary' => "",
-            //'tableOptions' => ['class' => 'table table-bordered table-striped dataTable'],
+             //   'tableOptions' => ['class' => 'table table-hover'],
             ],
             yii\grid\ActionColumn::class => [
                 'buttonOptions' => ['class' => 'btn btn-default btn-xs'],
@@ -90,7 +90,7 @@ return [
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
                                     'data' => [
-                                        'method' => 'post',
+                                        'pjax' => 0,
                                     ],
                         ]);
                     },
@@ -98,7 +98,7 @@ return [
                         return yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
                                     'class' => 'btn btn-default btn-xs',
                                     'data' => [
-                                        'method' => 'post',
+                                        'pjax' => 0,
                                     ],
                         ]);
                     },
@@ -159,7 +159,7 @@ return [
             yii\data\Pagination::class => [
                 'defaultPageSize' => 15,
             ],
-            yii\widgets\LinkPager::class=>[
+            yii\widgets\LinkPager::class => [
                 'options' => ['class' => 'pagination pagination-sm no-margin pull-right'],
                 'prevPageLabel' => '<i class="fa fa-angle-left"></i>',
                 'nextPageLabel' => '<i class="fa fa-angle-right"></i>',

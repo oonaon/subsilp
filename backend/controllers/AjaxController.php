@@ -7,6 +7,7 @@ use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use common\models\MessageSource;
 use common\models\Company;
+use common\models\Product;
 use common\models\AreaDistricts;
 
 class AjaxController extends Controller {
@@ -15,6 +16,15 @@ class AjaxController extends Controller {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return [
         ];
+    }
+    
+    public function actionProduct($input = null, $kind = '1') {
+        $model = Product::find()
+                ->select(['id', 'code','caption'])
+                ->where(['LIKE', 'kind', $kind])
+                ->andWhere('(code like :input) OR (caption like :input)', [':input' => '%' . $input . '%'])
+                ->all();
+        return self::convertOutput($model, ['code']);
     }
 
     public function actionLanguagecategory($input = null) {
@@ -61,6 +71,9 @@ class AjaxController extends Controller {
         } else if ($name == 'postcode') {
             $model = AreaDistricts::findOne($id);
             $text = $model->postcode.' - '.$model->getSelectLabel();
+        } else if ($name == 'product') {
+            $model = Product::findOne($id);
+            $text = $model->code;
         }
         if (!empty($model)) {
             return [$id => $text];

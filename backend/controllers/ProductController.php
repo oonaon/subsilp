@@ -18,19 +18,16 @@ use common\components\CActiveForm;
 
 class ProductController extends Controller {
 
-    public $tabs = ['view', 'properties', 'images', 'stocks','prices'];
+    public $tabs = ['view', 'properties', 'images', 'stocks', 'prices'];
 
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors() {
         return [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
-                //          'contact_delete' => ['POST'],
-                //          'contact_default' => ['POST'],
+                    'prices-delete' => ['POST'],
+                    'properties-delete' => ['POST'],
                 ],
             ],
         ];
@@ -46,27 +43,10 @@ class ProductController extends Controller {
         ]);
     }
 
-    public function actionView($id = '') {
+    public function actionView($id) {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        return $this->render('/product/item', [
-                    'model' => $model,
-                    'tabs' => $this->tabs,
-        ]);
-    }
-
-    public function actionCreate($id = '') {
-        $this->layout = 'main_tab';
-        $model = new Product();
-        $model->org = Yii::$app->session['organize'];
-        $model->kind = 1;
-        $model->status = 1;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->initProperties();
-            $model->initPrice();
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-        return $this->render('/product/item', [
+        return $this->render('/product/update', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
@@ -75,11 +55,19 @@ class ProductController extends Controller {
     public function actionUpdate($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->isNewRecord) {
+            $model->org = Yii::$app->session['organize'];
+            $model->kind = 1;
+            $model->status = 1;
         }
-
-        return $this->render('/product/item', [
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                $model->initProperties();
+                $model->initPrice();
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        return $this->render('/product/update', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
@@ -96,10 +84,10 @@ class ProductController extends Controller {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
         $items = ProductStock::find()->where(['product_id' => $model->id])->all();
-        $stocks=[];
-        if(!empty($items)){
-            foreach($items as $item){
-                $stocks[$item->color][]=$item;
+        $stocks = [];
+        if (!empty($items)) {
+            foreach ($items as $item) {
+                $stocks[$item->sub][] = $item;
             }
         }
         return $this->render('/product/stock', [
@@ -114,38 +102,30 @@ class ProductController extends Controller {
     public function actionImages($id) {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-
-        $old_files = $model->images;
-        if ($model->load(Yii::$app->request->post())) {
-            $model->images = File::uploadMultiple($id, $model, 'images', $old_files);
-            if ($model->save()) {
-                return $this->redirect(['view', 'id' => $model->id]);
-            }
-        }
-
         return $this->render('/product/images', [
                     'model' => $model,
                     'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionImages_update($id) {
+    public function actionImagesUpdate($id) {
+        $this->layout = 'main_tab';
         $model = $this->findModel($id);
         $old_files = $model->images;
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
             $model->images = File::uploadMultiple($id, $model, 'images', $old_files);
             if ($model->save()) {
                 return $this->redirect(['images', 'id' => $model->id]);
             }
         }
-
-        return $this->renderAjax('/product/images_form', [
+        return $this->render('/product/images_update', [
                     'model' => $model,
+                    'tabs' => $this->tabs,
         ]);
     }
-    
+
     // ****************************
-    
+
     public function actionPrices($id) {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
@@ -153,7 +133,7 @@ class ProductController extends Controller {
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'pagination' => false,
-            'sort'=> ['defaultOrder' => ['price'=>SORT_ASC]]
+            'sort' => ['defaultOrder' => ['price' => SORT_ASC]],
         ]);
         return $this->render('/product/price', [
                     'model' => $model,
@@ -162,32 +142,25 @@ class ProductController extends Controller {
         ]);
     }
 
-    public function actionPrices_create($id) {
-        $product = $this->findModel($id);
-        $model = new ProductPrice();
-        $model->product_id = $id;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['prices', 'id' => $id]);
+    public function actionPricesUpdate($id, $sid = '') {
+        $this->layout = 'main_tab';
+        $model = $this->findPrice($sid);
+        if ($model->isNewRecord) {
+            $model->product_id = $id;
+            $model->quantity = 0;
         }
-        return $this->renderAjax('/product/price_form', [
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                return $this->redirect(['prices', 'id' => $id]);
+            }
+        }
+        return $this->render('/product/price_update', [
                     'model' => $model,
-                    'product' => $product,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionPrices_update($id, $sid) {
-        $product = $this->findModel($id);
-        $model = ProductPrice::findOne($sid);
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['prices', 'id' => $id]);
-        }
-        return $this->renderAjax('/product/price_form', [
-                    'model' => $model,
-                    'product' => $product,
-        ]);
-    }
-
-    public function actionPrices_delete($id, $sid) {
+    public function actionPricesDelete($id, $sid) {
         ProductPrice::findOne($sid)->delete();
         return $this->redirect(['prices', 'id' => $id]);
     }
@@ -209,32 +182,24 @@ class ProductController extends Controller {
         ]);
     }
 
-    public function actionProperties_create($id) {
-        $product = $this->findModel($id);
-        $model = new ProductProperties();
-        $model->product_id = $id;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['properties', 'id' => $id]);
+    public function actionPropertiesUpdate($id, $sid='') {
+        $this->layout = 'main_tab';
+        $model = $this->findProperties($sid);
+        if ($model->isNewRecord) {
+            $model->product_id = $id;
         }
-        return $this->renderAjax('/product/properties_form', [
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
+            if ($model->save()) {
+                return $this->redirect(['properties', 'id' => $id]);
+            }
+        }
+        return $this->render('/product/properties_update', [
                     'model' => $model,
-                    'product' => $product,
+                    'tabs' => $this->tabs,
         ]);
     }
 
-    public function actionProperties_update($id, $sid) {
-        $product = $this->findModel($id);
-        $model = ProductProperties::findOne($sid);
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['properties', 'id' => $id]);
-        }
-        return $this->renderAjax('/product/properties_form', [
-                    'model' => $model,
-                    'product' => $product,
-        ]);
-    }
-
-    public function actionProperties_delete($id, $sid) {
+    public function actionPropertiesDelete($id, $sid) {
         ProductProperties::findOne($sid)->delete();
         return $this->redirect(['properties', 'id' => $id]);
     }
@@ -254,10 +219,30 @@ class ProductController extends Controller {
     }
 
     protected function findModel($id) {
-        if (($model = Product::findOne($id)) !== null) {
+        if (empty($id)) {
+            return new Product;
+        } else if (($model = Product::findOne($id)) !== null) {
             return $model;
         }
-        throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    protected function findProperties($id) {
+        if (empty($id)) {
+            return new ProductProperties;
+        } else if (($model = ProductProperties::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    protected function findPrice($id) {
+        if (empty($id)) {
+            return new ProductPrice;
+        } else if (($model = ProductPrice::findOne($id)) !== null) {
+            return $model;
+        }
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
 }

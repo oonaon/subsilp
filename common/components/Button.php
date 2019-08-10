@@ -26,7 +26,7 @@ class Button {
             'search' => '<i class="fa fa-search"></i>',
             'add' => '<i class="fa fa-plus"></i>',
             'update' => '<i class="fa fa-edit"></i>',
-            'add_update' => '<i class="fa fa-edit"></i>',
+            'manage' => '<i class="fa fa-edit"></i>',
             'view' => '<i class="fa fa-newspaper-o"></i>',
             'save' => '<i class="fa fa-save"></i>',
             'cancel' => '<i class="fa fa-ban"></i>',
@@ -38,6 +38,8 @@ class Button {
             'contact' => '<i class="fa fa-mobile"></i>',
             'location' => '<i class="fa fa-location-arrow"></i>',
             'files' => '<i class="fa fa-file"></i>',
+            
+            'modal' => '<i class="fa fa-newspaper-o"></i>',
             
             'first' => '<i class="fa fa-angle-double-left"></i>',
             'previous' => '<i class="fa fa-angle-left"></i>',

@@ -5,10 +5,10 @@ use yii\widgets\Pjax;
 use common\models\ItemAlias;
 use common\models\ProductCategory;
 use common\components\CustomColumn;
+use common\components\HeadNavigator;
 
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'product'), 'url' => ['index']];
-$this->params['title'] = Yii::t('backend/menu', 'product');
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs();
 
 Pjax::begin();
 echo GridView::widget([

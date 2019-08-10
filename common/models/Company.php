@@ -159,7 +159,7 @@ class Company extends CActiveRecord {
 
     public function beforeDelete() {
         File::deleteFileAll($this->files);
-        File::deleteDir($id);
+        File::deleteDir($this->id);
         return parent::beforeDelete();
     }
 
@@ -194,6 +194,35 @@ class Company extends CActiveRecord {
         }
     }
 
+    public function getFullAddress() {
+        $address = '';
+        if (!empty($this->district)) {
+            $district = AreaDistricts::findOne($this->district);
+            $address = $this->address . ' ' . $district->getAddress();
+        }
+        return $address;
+    }
+    
+    public function getBranch(){
+        if($this->branch==0){
+            return Yii::t('common/model', 'branch_head');
+        } else if($this->branch>0){
+            return Yii::t('common/model', 'branch_at').' '.str_pad($this->branch,4,'0',STR_PAD_LEFT);
+        } else {
+            return '';
+        }
+    }
+
+    public function getFullDetail() {
+        $detail = '<b>' . self::getFullName(true) . '</b><br>';
+        $detail .= !empty($this->address) ? self::getFullAddress() . '<br>' : '';
+        $detail .= !empty($this->tel) ? Yii::t('common/model', 'tel') . ' ' . $this->tel . ' ' : '';
+        $detail .= !empty($this->fax) ? Yii::t('common/model', 'fax') . ' ' . $this->fax : '';
+        $detail .= '<br>';
+        $detail .= !empty($this->tax) ? Yii::t('common/model', 'tax') . ' ' . $this->tax.' '.self::getBranch() : '';
+        return $detail;
+    }
+
     public static function getTypeFromController() {
         $controller = Yii::$app->controller->id;
         if ($controller == 'customer') {
@@ -208,9 +237,9 @@ class Company extends CActiveRecord {
         return $type;
     }
 
-    public function generateNewCode() {        
-        $type=self::getTypeFromController();
-        $last = Company::find()->where('(code like :prefix) and (org like :org) and (type like :type)', [':type' => '%' . $type . '%', ':org' => '%' . Yii::$app->session['organize'] . '%', ':prefix' => Code::frontCompany() . '%'])->orderBy(['abs(substring(code, 3))' => SORT_DESC])->select('code')->asArray()->one();        
+    public function generateNewCode() {
+        $type = self::getTypeFromController();
+        $last = Company::find()->where('(code like :prefix) and (org like :org) and (type like :type)', [':type' => '%' . $type . '%', ':org' => '%' . Yii::$app->session['organize'] . '%', ':prefix' => Code::frontCompany() . '%'])->orderBy(['abs(substring(code, 3))' => SORT_DESC])->select('code')->asArray()->one();
         $this->code = Code::generateCompanyCode($last['code']);
     }
 

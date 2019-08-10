@@ -5,12 +5,14 @@ namespace backend\controllers;
 use Yii;
 use common\models\Bill;
 use common\models\BillSearch;
+use common\models\BillItem;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use common\components\ControlBar;
 use yii\data\ActiveDataProvider;
 use common\models\Product;
+use yii\base\Model;
 
 class BillController extends Controller {
 
@@ -41,29 +43,10 @@ class BillController extends Controller {
     public function actionView($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        return $this->render('/bill/item', [
+        $model_items = $model->item;
+        return $this->render('/bill/update', [
                     'model' => $model,
-                    'tabs' => $this->tabs,
-        ]);
-    }
-
-    public function actionCreate($id = '') {
-        $this->layout = 'main_tab';
-        $model = new Bill();
-        //$model->scenario='QT';
-        $model->org = Yii::$app->session['organize'];
-        $model->type = Bill::getTypeFromController();
-        $model->date = date('Y-m-d');
-        $model->status = '1';
-        $model->remark = time();
-        $model->generateNewCode();
-        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
-            if ($model->save()) {
-               return $this->redirect(['view', 'id' => $model->id]); 
-            }
-        }
-        return $this->render('/bill/item', [
-                    'model' => $model,
+                    'model_items' => $model_items,
                     'tabs' => $this->tabs,
         ]);
     }
@@ -71,13 +54,55 @@ class BillController extends Controller {
     public function actionUpdate($id = '') {
         $this->layout = 'main_tab';
         $model = $this->findModel($id);
-        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax) {
-            if ($model->save()) {
-               return $this->redirect(['view', 'id' => $model->id]); 
+        $model_items = $model->item;
+
+        //$model->scenario='QT';
+        if ($model->isNewRecord) {
+            $model->org = Yii::$app->session['organize'];
+            $model->type = Bill::getTypeFromController();
+            $model->date = date('Y-m-d');
+            $model->status = '1';
+            $model->remark = time();
+            $model->generateNewCode();
+        }
+
+        $data = Yii::$app->request->post();
+        if ($model->load($data)) {
+            $model_items = $model->itemsLoad($data);
+            $model->checkContactDefault();
+            if (!Yii::$app->request->isPjax) {
+                if ($model->validate() && Model::validateMultiple($model_items)) {
+                    $model_items = $model->itemsProcess($model_items);
+                    $transaction = Yii::$app->db->beginTransaction();
+                    try {
+
+                        if ($model->save()) {
+                            if (!empty($model_items)) {
+                                $items_id = [];
+                                foreach ($model_items as $item) {
+                                    $item->bill_id = $model->id;
+                                    if ($item->save()) {
+                                        $items_id[] = $item->id;
+                                    }
+                                }
+                            }
+                            BillItem::deleteAll(['and', 'bill_id = :bill_id', ['not in', 'id', $items_id]], [':bill_id' => $model->id]);
+                        }
+
+                        $transaction->commit();
+                    } catch (Exception $e) {
+                        $transaction->rollBack();
+                        throw $e;
+                    }
+                    return $this->redirect(['view', 'id' => $model->id]);
+                }
+            } else {
+                $model_items = $model->itemsProcess($model_items);
             }
         }
-        return $this->render('/bill/item', [
+        return $this->render('/bill/update', [
                     'model' => $model,
+                    'model_items' => $model_items,
                     'tabs' => $this->tabs,
         ]);
     }
@@ -100,10 +125,12 @@ class BillController extends Controller {
     }
 
     protected function findModel($id) {
-        if (($model = Bill::findOne($id)) !== null) {
+        if (empty($id)) {
+            return new Bill;
+        } else if (($model = Bill::findOne($id)) !== null) {
             return $model;
         }
-        throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+        throw new \yii\web\NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
 }

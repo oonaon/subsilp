@@ -52,4 +52,7 @@ class ProductProperties extends \common\components\CActiveRecord {
         return $this->hasOne(Unit::className(), ['id' => 'product_id']);
     }
 
+    public function getProduct() {
+        return $this->hasOne(Product::className(), ['id' => 'product_id']);
+    }
 }

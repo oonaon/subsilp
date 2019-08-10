@@ -56,5 +56,10 @@ class AreaDistricts extends \yii\db\ActiveRecord {
         $out = $this->name_th . ' / ' . $this->amphure->name_th.' / '.$this->amphure->province->name_th;
         return $out;
     }
+    
+    public function getAddress(){
+        $out = $this->name_th . ' ' . $this->amphure->name_th.' '.$this->amphure->province->name_th.' '.$this->postcode;
+        return $out;
+    }
 
 }

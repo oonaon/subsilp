@@ -1,44 +1,29 @@
 <?php
 
 use yii\grid\GridView;
-use yii\helpers\Html;
 use common\components\CustomColumn;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
 
-$controller = Yii::$app->controller->id;
-if ($controller == 'customer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'customer');
-} else if ($controller == 'supplier') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'supplier');
-} else if ($controller == 'manufacturer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'injector');
-}
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->getFullName(false));
 
 $this->params['panel'] = [
     'id' => 'tab',
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
-    'title' => $model->name,
+    'title' => $model->code . ' - ' . $model->getFullName(true),
     'controlbar' => [
         'button' => [
-            'add_update' => [
-                'link' => ['location_create', 'id' => $model->id, '#' => 'modal-md'],
-                'modal' => 'modal-ajax',
+            'manage' => [
+                'link' => ['location-update', 'id' => $model->id],
             ],
         ],
-        'template_add' => ['add_update'],
+        'template_add' => ['manage'],
     ],
 ];
-
+Pjax::begin();
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     //'filterModel' => $searchModel,
@@ -55,26 +40,26 @@ echo GridView::widget([
             'attribute' => 'address',
             'format' => 'html',
             'value' => function($model) {
-                return CustomColumn::full_address($model);
+                return $model->getFullAddress();
             }
         ],
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{default} {modal} {delete}',
+            'template' => '{default} {update} {delete}',
             'urlCreator' => function ($button, $item, $key, $index) use ($model) {
                 if ($button === 'default') {
-                    $url = ['location_default', 'id' => $model->id, 'sid' => $item->id];
+                    $url = ['location-default', 'id' => $model->id, 'sid' => $item->id];
                     return $url;
                 }
-                if ($button === 'modal') {
-                    $url = ['location_update', 'id' => $model->id, 'sid' => $item->id, '#' => 'modal-md'];
+                if ($button === 'update') {
+                    $url = ['location-update', 'id' => $model->id, 'sid' => $item->id];
                     return $url;
                 }
                 if ($button === 'delete') {
                     if ($item->item_fix) {
                         return false;
                     } else {
-                        $url = ['location_delete', 'id' => $model->id, 'sid' => $item->id];
+                        $url = ['location-delete', 'id' => $model->id, 'sid' => $item->id];
                         return $url;
                     }
                 }
@@ -82,4 +67,5 @@ echo GridView::widget([
         ],
     ],
 ]);
+Pjax::end();
 ?>

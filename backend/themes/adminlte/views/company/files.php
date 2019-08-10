@@ -1,47 +1,28 @@
 <?php
-use yii\helpers\Url;
-use common\models\ItemAlias;
-use kartik\select2\Select2;
-use common\components\Area;
 use yii\widgets\ActiveForm;
-use yii\helpers\Html;
-use common\models\File;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
 
-$controller=Yii::$app->controller->id;
-if ($controller == 'customer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'customer');
-} else if ($controller == 'supplier') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'supplier');
-} else if ($controller == 'manufacturer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['item', 'id' => $model->id]];
-    $this->params['title'] = Yii::t('backend/menu', 'injector');
-}
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->getFullName(false));
 
 $this->params['panel'] = [
     'id' => 'tab',
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
-    'title' => $model->name,
+    'title' => $model->code . ' - ' . $model->getFullName(true),
     'controlbar' => [
         'button' => [
-            'add_update' => [
-                'link' => ['files_update', 'id' => $model->id, '#' => 'modal-md'],
-                'modal' => 'modal-ajax',
+            'manage' => [
+                'link' => ['files-update', 'id' => $model->id],
             ],
         ],
-        'template_add' => ['add_update'],
+        'template_add' => ['manage'],
     ],
 ];
 
+Pjax::begin();
 $form = ActiveForm::begin();
 ?>
 
@@ -51,4 +32,5 @@ $form = ActiveForm::begin();
 
 <?php
 ActiveForm::end();
+Pjax::end();
 ?>

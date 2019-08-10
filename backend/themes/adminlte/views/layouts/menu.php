@@ -36,10 +36,10 @@ $action = Yii::$app->controller->action->id;
                 [
                     'options' => ['class' => 'sidebar-menu tree', 'data-widget' => 'tree'],
                     'items' => [
+                        ['label' => Yii::t('backend/menu', 'site'), 'icon' => 'desktop', 'url' => ['/site']],
                         //['label' => 'Login', 'url' => ['site/login'], 'visible' => Yii::$app->user->isGuest],
                         // ****** MAIN MENU ******
                         ['label' => Yii::t('backend/menu', 'main'), 'options' => ['class' => 'header']],
-                        
                         // SELL MENU
                         [
                             'label' => Yii::t('backend/menu', 'sell'),
@@ -84,7 +84,7 @@ $action = Yii::$app->controller->action->id;
                             'icon' => 'industry',
                             'url' => '#',
                             'items' => [
-                                ['label' => Yii::t('backend/menu', 'injector'), 'icon' => 'file-code-o', 'url' => ['/manufacturer/index'], 'active' => ($controller == 'manufacturer' ? true : false)],
+                                ['label' => Yii::t('backend/menu', 'manufacturer'), 'icon' => 'file-code-o', 'url' => ['/manufacturer/index'], 'active' => ($controller == 'manufacturer' ? true : false)],
                                 ['label' => 'manu 2', 'icon' => 'dashboard', 'url' => ['/debug'],],
                                 [
                                     'label' => 'manu 3',

@@ -53,12 +53,6 @@ if (is_array($buttons)) {
     }
 }
 
-$this->registerJs(' 
-        $("#btn-save").click(function () {
-            $("#control-form").removeAttr("data-pjax");
-            $("#control-form").submit();
-        });', \yii\web\View::POS_READY);
-
 // ***** START MODEL SEARCH *****
 Modal::begin([
     'header' => Yii::t('backend/header', 'search_code'),

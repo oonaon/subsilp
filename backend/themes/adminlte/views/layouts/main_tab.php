@@ -4,6 +4,7 @@ use yii\helpers\Url;
 use common\components\ControlBar;
 use common\components\Button;
 
+
 $panel = $this->params['panel'];
 $panel['controlbar'] = (empty($panel['controlbar'])) ? '' : $panel['controlbar'];
 ?>
@@ -34,11 +35,11 @@ $panel['controlbar'] = (empty($panel['controlbar'])) ? '' : $panel['controlbar']
                         <?php
                         foreach ($panel['tabs'] as $tab) {
                             $active = false;
-                            if (Yii::$app->controller->action->id == $tab) {
+                            $action=explode('-',Yii::$app->controller->action->id);
+                            $action=$action[0];
+                            if ($action == $tab) {
                                 $active = true;
-                            } else if (Yii::$app->controller->action->id == 'update' && $tab == 'view') {
-                                $active = true;
-                            } else if (Yii::$app->controller->action->id == 'create' && $tab == 'view') {
+                            } else if ($action == 'update' && $tab == 'view') {
                                 $active = true;
                             }
                             echo '<li class="';
@@ -72,9 +73,11 @@ $panel['controlbar'] = (empty($panel['controlbar'])) ? '' : $panel['controlbar']
 
         </div>
         <div class="box-body">
+            
             <fieldset <?= ($panel['disabled'] ? 'disabled="disabled"' : '') ?>>
                 <?= $content; ?>
             </fieldset>
+            
         </div>
     </div>
 

@@ -1,24 +1,13 @@
 <?php
 
 use yii\grid\GridView;
-use yii\widgets\Pjax;
 use common\models\ItemAlias;
 use common\components\CustomColumn;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
 
-$controller = Yii::$app->controller->id;
-if ($controller == 'customer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'customer');
-} else if ($controller == 'supplier') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'supplier');
-} else if ($controller == 'manufacturer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'injector');
-}
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs();
 
 Pjax::begin();
 echo GridView::widget([

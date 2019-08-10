@@ -66,8 +66,4 @@ class CustomColumn {
         return $out;
     }
 
-    public function full_address($model) {
-        return Area::fullAddress($model);
-    }
-
 }

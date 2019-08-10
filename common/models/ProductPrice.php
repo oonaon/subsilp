@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use common\models\Product;
 
 /**
  * This is the model class for table "product_price".
@@ -48,5 +49,9 @@ class ProductPrice extends \common\components\CActiveRecord
             'rank' => Yii::t('common/model', 'rank'),
             'price' => Yii::t('common/model', 'price'),
         ];
+    }
+    
+    public function getProduct() {
+        return $this->hasOne(Product::className(), ['id' => 'product_id']);
     }
 }

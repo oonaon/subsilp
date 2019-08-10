@@ -1,44 +1,25 @@
 <?php
 
-use yii\helpers\Url;
 use common\models\ItemAlias;
-use kartik\select2\Select2;
-use common\components\Area;
-use yii\widgets\ActiveForm;
+use common\components\CActiveForm;
 use yii\widgets\Pjax;
+use common\components\HeadNavigator;
 
-$controller = Yii::$app->controller->id;
-if ($controller == 'customer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'customer');
-} else if ($controller == 'supplier') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'buy')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'supplier'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'supplier');
-} else if ($controller == 'manufacturer') {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'manufacture')];
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'injector'), 'url' => ['index']];
-    $this->params['title'] = Yii::t('backend/menu', 'injector');
-}
-if (!empty($model->id)) {
-    $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->id]];
-}
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->getFullName(false));
 
 $action_id = Yii::$app->controller->action->id;
 if ($action_id == 'view') {
     $button = ['update'];
 } else if ($action_id == 'update') {
     $button = ['save', 'cancel'];
-} else if ($action_id == 'create') {
-    $button = ['save', 'cancel'];
 }
 
 $this->params['panel'] = [
     'id' => 'tab',
     'tabs' => $tabs,
-    'tabs_disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? true : false,
-    'disabled' => in_array(Yii::$app->controller->action->id, ['create', 'update']) ? false : true,
+    'tabs_disabled' => $action_id == 'update' ? true : false,
+    'disabled' => $action_id == 'update' ? false : true,
     'title' => empty($model->name) ? Yii::t('backend/tab', 'add_new') : $model->code . ' - ' . $model->getFullName(true),
     'controlbar' => [
         'template_add' => $button,
@@ -46,25 +27,17 @@ $this->params['panel'] = [
 ];
 
 Pjax::begin();
-$form = ActiveForm::begin(['id' => 'control-form']);
+$form = CActiveForm::begin(['id' => 'control-form', 'enableClientValidation' => false]);
 ?>
 <?= $form->errorSummary($model); ?>
 
 <div class="row">
     <?= $form->field($model, 'code', ['options' => ['class' => 'col-xs-6 col-md-3']])->textInput(['maxlength' => true]) ?>
     <?=
-    $form->field($model, 'org', ['options' => ['class' => 'col-xs-12 col-md-4']])->widget(Select2::classname(), [
-        'data' => ItemAlias::getData('org'),
-        'options' => ['multiple' => true],
-        'disabled' => $this->params['panel']['disabled'],
-    ]);
+    $form->field($model, 'org', ['options' => ['class' => 'col-xs-12 col-md-4']])->multiple(ItemAlias::getData('org'), ['disabled' => $this->params['panel']['disabled']]);
     ?>
     <?=
-    $form->field($model, 'type', ['options' => ['class' => 'col-xs-12 col-md-4']])->widget(Select2::classname(), [
-        'data' => ItemAlias::getData('company_type'),
-        'options' => ['multiple' => true],
-        'disabled' => $this->params['panel']['disabled'],
-    ]);
+    $form->field($model, 'type', ['options' => ['class' => 'col-xs-12 col-md-4']])->multiple(ItemAlias::getData('company_type'), ['disabled' => $this->params['panel']['disabled']]);
     ?>
 </div>
 
@@ -111,6 +84,6 @@ $form = ActiveForm::begin(['id' => 'control-form']);
 </div>
 
 <?php
-ActiveForm::end();
+CActiveForm::end();
 Pjax::end();
 ?>

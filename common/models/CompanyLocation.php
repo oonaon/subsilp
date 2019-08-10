@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use common\models\AreaDistricts;
 use common\components\CActiveRecord;
+use common\models\Company;
 
 /**
  * This is the model class for table "company_location".
@@ -24,7 +25,7 @@ use common\components\CActiveRecord;
 class CompanyLocation extends CActiveRecord {
 
     const UPLOAD_FOLDER = 'images';
-    
+
     public $map_upload;
 
     /**
@@ -42,11 +43,11 @@ class CompanyLocation extends CActiveRecord {
             [['company_id', 'address', 'district'], 'required'],
             [['district'], 'integer', 'min' => 1, 'message' => Yii::t('backend/general', 'select') . ' {attribute} '],
             [['company_id', 'contact_id', 'item_default', 'item_fix', 'district'], 'integer'],
-            [['address', 'memo', 'contact','map'], 'string'],
+            [['address', 'memo', 'contact', 'map'], 'string'],
             [['postcode'], 'string', 'max' => 5],
             [['postcode'], 'number'],
-            [['latitude','longitude'], 'double'],
-            [['map_upload'], 'file', 'maxFiles' => 10,'skipOnEmpty' => true, 'extensions' => ['jpg','png','pdf','zip','ai']],
+            [['latitude', 'longitude'], 'double'],
+            [['map_upload'], 'file', 'maxFiles' => 10, 'skipOnEmpty' => true, 'extensions' => ['jpg', 'png', 'pdf', 'zip', 'ai']],
         ];
     }
 
@@ -73,7 +74,7 @@ class CompanyLocation extends CActiveRecord {
         ];
     }
 
-    public function beforeSave($insert) {       
+    public function beforeSave($insert) {
         $district = AreaDistricts::findOne($this->district);
         if (empty($district)) {
             $this->district = 0;
@@ -87,14 +88,27 @@ class CompanyLocation extends CActiveRecord {
         }
         return parent::beforeSave($insert);
     }
-    
+
     public function beforeDelete() {
         File::deleteFileAll($this->map);
         return parent::beforeDelete();
-    }   
+    }
 
     public function afterFind() {
         return parent::afterFind();
+    }
+
+    public function getCompany() {
+        return $this->hasOne(Company::className(), ['id' => 'company_id']);
+    }
+
+    public function getFullAddress() {
+        $address = '';
+        if (!empty($this->district)) {
+            $district = AreaDistricts::findOne($this->district);
+            $address = $this->address.' '.$district->getAddress();
+        }
+        return $address;
     }
 
 }

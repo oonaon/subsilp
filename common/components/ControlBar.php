@@ -12,7 +12,7 @@ class ControlBar extends Widget {
 
     public $pattern, $id, $class, $params;
     public $controller_id, $action_id;
-    public $template = ['index', 'search', 'add', 'delete', 'first', 'previous', 'next', 'last'];
+    public $template = ['index', 'search', 'add', 'delete', 'first', 'previous', 'next', 'last', 'modal'];
 
     public function init() {
         parent::init();
@@ -36,7 +36,7 @@ class ControlBar extends Widget {
                 'button' => 'icon',
             ],
             'add' => [
-                'link' => ['create'],
+                'link' => ['update'],
                 'disabled' => false,
                 'modal' => false,
                 'position' => 'group_1',
@@ -49,7 +49,7 @@ class ControlBar extends Widget {
                 'position' => 'right',
                 'button' => '',
             ],
-            'add_update' => [
+            'manage' => [
                 'link' => ['update', 'id' => $this->id],
                 'disabled' => false,
                 'modal' => false,
@@ -112,6 +112,13 @@ class ControlBar extends Widget {
                 'position' => 'left',
                 'button' => 'icon',
             ],
+            'modal' => [
+                'link' => ['index', '#' => 'modal-md'],
+                'disabled' => false,
+                'modal' => 'modal-ajax',
+                'position' => 'group_3',
+                'button' => 'icon',
+            ],
         ];
     }
 
@@ -129,15 +136,6 @@ class ControlBar extends Widget {
             $btn['previous']['disabled'] = true;
             $btn['next']['disabled'] = true;
             $btn['last']['disabled'] = true;
-
-            if ($this->action_id == 'create') {
-                $btn['add']['disabled'] = true;
-                $btn['save']['disabled'] = false;
-                $btn['cancel']['disabled'] = false;
-            } else {
-                $btn['save']['disabled'] = true;
-                $btn['cancel']['disabled'] = true;
-            }
             $btn['cancel']['link'] = ['index'];
         } else {
             $id_first = $this->getFirstID();
@@ -173,20 +171,13 @@ class ControlBar extends Widget {
             $btn['update']['disabled'] = false;
             $btn['delete']['disabled'] = false;
 
-            if ($this->action_id == 'update') {
-                $btn['add']['disabled'] = true;
-                $btn['save']['disabled'] = false;
-                $btn['cancel']['disabled'] = false;
-                $btn['delete']['disabled'] = true;
-                $btn['update']['disabled'] = true;
+            if (in_array('save', $this->template)) {
                 $btn['first']['disabled'] = true;
                 $btn['previous']['disabled'] = true;
                 $btn['next']['disabled'] = true;
                 $btn['last']['disabled'] = true;
-            } else {
-                $btn['save']['disabled'] = true;
-                $btn['cancel']['disabled'] = true;
-                $btn['update']['disabled'] = false;
+                $btn['delete']['disabled'] = true;
+                $btn['add']['disabled'] = true;
             }
         }
 

@@ -13,7 +13,7 @@ use common\components\CActiveRecord;
  * @property int $sort_order
  * @property string $product
  * @property int $product_id
- * @property string $color
+ * @property string $sub
  * @property string $caption
  * @property int $quantity
  * @property int $stock_id
@@ -23,28 +23,27 @@ use common\components\CActiveRecord;
  * @property string $free
  * @property string $remark
  */
-class BillItem extends CActiveRecord
-{
+class BillItem extends CActiveRecord {
+
+    public $old, $price_suggest;
+
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
-    {
+    public static function tableName() {
         return 'bill_item';
     }
 
     /**
      * {@inheritdoc}
      */
-    public function rules()
-    {
+    public function rules() {
         return [
-            [['bill_id', 'sort_order', 'product', 'product_id', 'color', 'caption', 'quantity', 'stock_id', 'price', 'discount', 'total', 'free', 'remark'], 'required'],
-            [['bill_id', 'sort_order', 'product_id', 'quantity', 'stock_id'], 'integer'],
-            [['price', 'discount', 'total'], 'number'],
+            [['product_id', 'stock_id'], 'required'],
+            [['bill_id', 'sort_order', 'product_id', 'quantity', 'stock_id', 'old'], 'integer'],
+            [['price', 'discount', 'total', 'quantity'], 'number'],
             [['remark'], 'string'],
-            [['product'], 'string', 'max' => 100],
-            [['color', 'free'], 'string', 'max' => 5],
+            [['sub', 'free'], 'string', 'max' => 5],
             [['caption'], 'string', 'max' => 255],
         ];
     }
@@ -52,23 +51,27 @@ class BillItem extends CActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function attributeLabels()
-    {
+    public function attributeLabels() {
         return [
-            'id' => Yii::t('common/model', 'ID'),
-            'bill_id' => Yii::t('common/model', 'Bill ID'),
-            'sort_order' => Yii::t('common/model', 'Sort Order'),
-            'product' => Yii::t('common/model', 'Product'),
-            'product_id' => Yii::t('common/model', 'Product ID'),
-            'color' => Yii::t('common/model', 'Color'),
-            'caption' => Yii::t('common/model', 'Caption'),
-            'quantity' => Yii::t('common/model', 'Quantity'),
-            'stock_id' => Yii::t('common/model', 'Stock ID'),
-            'price' => Yii::t('common/model', 'Price'),
-            'discount' => Yii::t('common/model', 'Discount'),
-            'total' => Yii::t('common/model', 'Total'),
-            'free' => Yii::t('common/model', 'Free'),
-            'remark' => Yii::t('common/model', 'Remark'),
+            'id' => Yii::t('common/model', 'id'),
+            'bill_id' => Yii::t('common/model', 'bill'),
+            'sort_order' => Yii::t('common/model', 'sort_order'),
+            'product_id' => Yii::t('common/model', 'product'),
+            'sub' => Yii::t('common/model', 'color'),
+            'caption' => Yii::t('common/model', 'caption'),
+            'quantity' => Yii::t('common/model', 'quantity'),
+            'stock_id' => Yii::t('common/model', 'stock'),
+            'price' => Yii::t('common/model', 'price'),
+            'discount' => Yii::t('common/model', 'discount'),
+            'total' => Yii::t('common/model', 'total'),
+            'free' => Yii::t('common/model', 'free'),
+            'remark' => Yii::t('common/model', 'remark'),
         ];
     }
+
+    public function afterFind() {
+        parent::afterFind();
+        $this->old = $this->product_id;
+    }
+
 }

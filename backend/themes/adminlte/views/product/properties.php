@@ -6,27 +6,28 @@ use common\components\CustomColumn;
 use common\components\Button;
 use common\models\Unit;
 use common\models\ItemAlias;
+use yii\widgets\Pjax;
+use common\components\HeadNavigator;
 
-$this->params['title'] = Yii::t('backend/menu', 'product');
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'sell')];
-$this->params['breadcrumbs'][] = ['label' => Yii::t('backend/menu', 'customer'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->code, 'url' => ['item', 'id' => $model->id]];
+$this->params['header'] = HeadNavigator::header();
+$this->params['breadcrumbs'] = HeadNavigator::breadcrumbs($model->code);
+
 $this->params['panel'] = [
+    'id' => 'tab',
     'tabs' => $tabs,
     'tabs_disabled' => false,
     'disabled' => false,
     'title' => $model->code,
     'controlbar' => [
         'button' => [
-            'add_update' => [
-                'link' => ['properties_create', 'id' => $model->id, '#' => 'modal-md'],
-                'modal' => 'modal-ajax',
+            'manage' => [
+                'link' => ['properties-update', 'id' => $model->id],
             ],
         ],
-        'template_add' => ['add_update'],
+        'template_add' => ['manage'],
     ],
 ];
-
+Pjax::begin();
 echo GridView::widget([
     'dataProvider' => $dataProvider,
     //'filterModel' => $searchModel,
@@ -49,17 +50,17 @@ echo GridView::widget([
         ],
         [
             'class' => 'yii\grid\ActionColumn',
-            'template' => '{modal} {delete}',
+            'template' => '{update} {delete}',
             'urlCreator' => function ($button, $item, $key, $index) use ($model) {
-                if ($button === 'modal') {
-                    $url = ['properties_update', 'id' => $model->id, 'sid' => $item->id, '#' => 'modal-md'];
+                if ($button === 'update') {
+                    $url = ['properties-update', 'id' => $model->id, 'sid' => $item->id];
                     return $url;
                 }
                 if ($button === 'delete') {
                     if ($model->checkPrimaryProperties($item->name)) {
                         return false;
                     } else {
-                        $url = ['properties_delete', 'id' => $model->id, 'sid' => $item->id];
+                        $url = ['properties-delete', 'id' => $model->id, 'sid' => $item->id];
                         return $url;
                     }
                 }
@@ -67,6 +68,7 @@ echo GridView::widget([
         ],
     ],
 ]);
+Pjax::end();
 ?>
 
 

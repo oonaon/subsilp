@@ -4,6 +4,7 @@ namespace common\models;
 
 use Yii;
 use common\components\CActiveRecord;
+use common\models\Company;
 
 /**
  * This is the model class for table "company_contact".
@@ -49,4 +50,10 @@ class CompanyContact extends CActiveRecord {
             'item_default' => Yii::t('common/model', 'item_default'),
         ];
     }
+    
+    public function getCompany()
+    {
+        return $this->hasOne(Company::className(), ['id' => 'company_id']);
+    }
+
 }
